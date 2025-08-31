@@ -21,6 +21,7 @@ module.exports = {
           'app/*': './src/app/*',
           'shared/*': './src/shared/*',
           'screens/*': './src/screens/*',
+          'native/*': './src/native/*'
         },
       },
     ],
