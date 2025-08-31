@@ -4,12 +4,13 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ProgressChart, BarChart, LineChart } from 'features/charts';
 import { StatisticsCard } from 'features/statistics';
 import { storageService } from 'shared/lib/storage';
+import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 
 interface ChartData {
@@ -23,6 +24,9 @@ interface ChartData {
   todaySessions: number;
   averageSessionTime: number;
   learningRate: number;
+  totalUsageTime: number;
+  todayUsageTime: number;
+  dailyUsage: any[];
 }
 
 const StatisticsScreen = () => {
@@ -32,13 +36,29 @@ const StatisticsScreen = () => {
 
   useEffect(() => {
     loadData();
+    usageTrackingService.startSession('Statistics');
+    
+    return () => {
+      usageTrackingService.endCurrentSession();
+    };
   }, []);
 
   const loadData = async () => {
     try {
       setError(null);
-      const stats = await storageService.getStatistics();
-      setData(stats);
+      const [stats, dailyUsage, totalUsageTime, todayUsageTime] = await Promise.all([
+        storageService.getStatistics(),
+        usageTrackingService.getDailyUsage(7),
+        usageTrackingService.getTotalUsageTime(),
+        usageTrackingService.getTodayUsageTime(),
+      ]);
+      
+      setData({
+        ...stats,
+        totalUsageTime,
+        todayUsageTime,
+        dailyUsage,
+      });
     } catch (err) {
       setError('Unable to load statistics data');
     } finally {
@@ -56,34 +76,88 @@ const StatisticsScreen = () => {
     return `${minutes}m`;
   };
 
-  const weeklyProgressData = [
-    { label: 'Mon', value: 5 },
-    { label: 'Tue', value: 8 },
-    { label: 'Wed', value: 12 },
-    { label: 'Thu', value: 6 },
-    { label: 'Fri', value: 15 },
-    { label: 'Sat', value: 10 },
-    { label: 'Sun', value: 7 },
-  ];
+  const getWeeklyProgressData = () => {
+    if (!data?.dailyUsage) return [];
+    
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const weekData = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      const dayUsage = data.dailyUsage.find(usage => usage.date === dateKey);
+      
+      weekData.push({
+        label: weekDays[date.getDay()],
+        value: dayUsage ? Math.round(dayUsage.totalTime / (1000 * 60)) : 0, // Convert to minutes
+      });
+    }
+    
+    return weekData;
+  };
 
-  const sessionTimeData = [
-    { label: 'Mon', value: 25, color: theme.semanticColors.brand },
-    { label: 'Tue', value: 35, color: theme.semanticColors.success },
-    { label: 'Wed', value: 20, color: theme.semanticColors.warning },
-    { label: 'Thu', value: 40, color: theme.colors.purple[500] },
-    { label: 'Fri', value: 30, color: theme.semanticColors.error },
-    { label: 'Sat', value: 45, color: theme.semanticColors.brand },
-    { label: 'Sun', value: 15, color: theme.semanticColors.success },
-  ];
+  const getSessionTimeData = () => {
+    if (!data?.dailyUsage) return [];
+    
+    const colors = [
+      theme.semanticColors.brand,
+      theme.semanticColors.success,
+      theme.semanticColors.warning,
+      theme.colors.purple[500],
+      theme.semanticColors.error,
+      theme.semanticColors.brand,
+      theme.semanticColors.success,
+    ];
+    
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+    const weekData = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split('T')[0];
+      const dayUsage = data.dailyUsage.find(usage => usage.date === dateKey);
+      
+      weekData.push({
+        label: weekDays[date.getDay()],
+        value: dayUsage ? Math.round(dayUsage.totalTime / (1000 * 60)) : 0, // Convert to minutes
+        color: colors[i],
+      });
+    }
+    
+    return weekData;
+  };
 
-  const learningTrendData = [
-    { label: 'Week 1', value: 20 },
-    { label: 'Week 2', value: 35 },
-    { label: 'Week 3', value: 28 },
-    { label: 'Week 4', value: 42 },
-    { label: 'Week 5', value: 38 },
-    { label: 'Week 6', value: 50 },
-  ];
+  const getLearningTrendData = () => {
+    if (!data?.dailyUsage) return [];
+    
+    // Group by weeks for the last 6 weeks
+    const weeks = [];
+    const today = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - (i * 7));
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      const weekUsage = data.dailyUsage.filter(usage => {
+        const usageDate = new Date(usage.date);
+        return usageDate >= weekStart && usageDate <= weekEnd;
+      });
+      
+      const totalTime = weekUsage.reduce((sum, day) => sum + day.totalTime, 0);
+      weeks.push({
+        label: `Week ${6 - i}`,
+        value: Math.round(totalTime / (1000 * 60)), // Convert to minutes
+      });
+    }
+    
+    return weeks;
+  };
 
   if (loading) {
     return (
@@ -133,8 +207,8 @@ const StatisticsScreen = () => {
             />
             <StatisticsCard
               title="Total Time"
-              value={formatTime(data.totalTimeSpent)}
-              subtitle="spent learning"
+              value={formatTime(data.totalUsageTime || data.totalTimeSpent)}
+              subtitle="total app usage"
               color={theme.colors.purple[500]}
               size="medium"
             />
@@ -167,9 +241,9 @@ const StatisticsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Weekly Progress Trend</Text>
           <LineChart
-            data={weeklyProgressData}
-            title="Words Learned This Week"
-            subtitle="Daily learning progress"
+            data={getWeeklyProgressData()}
+            title="App Usage This Week"
+            subtitle="Daily usage in minutes"
             color={theme.semanticColors.brand}
             height={250}
           />
@@ -179,9 +253,9 @@ const StatisticsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Session Time Analysis</Text>
           <BarChart
-            data={sessionTimeData}
-            title="Daily Study Sessions"
-            subtitle="Minutes spent learning each day"
+            data={getSessionTimeData()}
+            title="Daily App Usage"
+            subtitle="Minutes spent using the app each day"
             height={250}
             showValues={true}
           />
@@ -189,11 +263,11 @@ const StatisticsScreen = () => {
 
         {/* Learning Trend */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Learning Trend</Text>
+          <Text style={styles.sectionTitle}>Usage Trend</Text>
           <LineChart
-            data={learningTrendData}
-            title="6-Week Learning Journey"
-            subtitle="Words learned per week"
+            data={getLearningTrendData()}
+            title="6-Week Usage Journey"
+            subtitle="App usage per week in minutes"
             color={theme.colors.purple[500]}
             height={250}
           />
@@ -209,9 +283,9 @@ const StatisticsScreen = () => {
               <Text style={styles.metricUnit}>days</Text>
             </View>
             <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{data.todaySessions}</Text>
-              <Text style={styles.metricLabel}>Today's Sessions</Text>
-              <Text style={styles.metricUnit}>completed</Text>
+              <Text style={styles.metricValue}>{formatTime(data.todayUsageTime || 0)}</Text>
+              <Text style={styles.metricLabel}>Today's Usage</Text>
+              <Text style={styles.metricUnit}>app time</Text>
             </View>
             <View style={styles.metricCard}>
               <Text style={styles.metricValue}>{formatTime(data.averageSessionTime)}</Text>

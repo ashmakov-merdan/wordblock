@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
+import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 import { Word } from 'shared/lib/types';
 
@@ -28,6 +29,7 @@ const LearningScreen = () => {
   useEffect(() => {
     loadRandomWord();
     setSessionStartTime(Date.now());
+    usageTrackingService.startSession('Learning');
     
     // Fade in animation
     Animated.timing(fadeAnim, {
@@ -35,6 +37,10 @@ const LearningScreen = () => {
       duration: 500,
       useNativeDriver: true,
     }).start();
+    
+    return () => {
+      usageTrackingService.endCurrentSession();
+    };
   }, []);
 
   useEffect(() => {

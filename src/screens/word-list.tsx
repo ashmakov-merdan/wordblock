@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
+import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 import { Word } from 'shared/lib/types';
 
@@ -26,12 +27,18 @@ const WordListScreen = () => {
 
   useEffect(() => {
     loadWords();
+    usageTrackingService.startSession('WordList');
+    
+    return () => {
+      usageTrackingService.endCurrentSession();
+    };
   }, []);
 
   // Refresh words when screen comes into focus
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       loadWords();
+      usageTrackingService.startSession('WordList');
     });
 
     return unsubscribe;

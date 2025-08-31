@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
+import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 import { BlockingSettings, AppSettings } from 'shared/lib/types';
 
@@ -30,6 +31,11 @@ const SettingsScreen = () => {
 
   useEffect(() => {
     loadSettings();
+    usageTrackingService.startSession('Settings');
+    
+    return () => {
+      usageTrackingService.endCurrentSession();
+    };
   }, []);
 
   const loadSettings = async () => {
@@ -91,61 +97,7 @@ const SettingsScreen = () => {
     }
   };
 
-  const handleResetStats = () => {
-    Alert.alert(
-      'Reset Statistics',
-      'Are you sure you want to reset all your learning statistics? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await storageService.updateProgress({
-                totalWords: 0,
-                learnedWords: 0,
-                totalTimeSpent: 0,
-                totalSessions: 0,
-                currentStreak: 0,
-                longestStreak: 0,
-              });
-              await storageService.updateBlockingSettings({
-                totalBlocksTriggered: 0,
-                lastBlockTime: undefined,
-              });
-              Alert.alert('Success', 'Statistics have been reset.');
-            } catch (error) {
-              console.error('Failed to reset stats:', error);
-            }
-          },
-        },
-      ]
-    );
-  };
 
-  const handleClearAllData = () => {
-    Alert.alert(
-      'Clear All Data',
-      'This will delete all words, progress, and settings. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear All',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await storageService.clearAllData();
-              Alert.alert('Success', 'All data has been cleared.');
-              navigation.navigate('Home' as never);
-            } catch (error) {
-              console.error('Failed to clear data:', error);
-            }
-          },
-        },
-      ]
-    );
-  };
 
   if (loading) {
     return (
@@ -191,37 +143,6 @@ const SettingsScreen = () => {
           </View>
 
           <View style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Blocking Interval</Text>
-            <Text style={styles.settingDescription}>
-              How long to use device before blocking
-            </Text>
-            <View style={styles.intervalOptions}>
-              {BLOCKING_INTERVALS.map((interval) => (
-                <TouchableOpacity
-                  key={interval.value}
-                  style={[
-                    styles.intervalOption,
-                    blockingSettings?.intervalMinutes === interval.value && styles.intervalOptionSelected
-                  ]}
-                  onPress={() => updateBlockingInterval(interval.value)}
-                >
-                  <Text style={[
-                    styles.intervalOptionText,
-                    blockingSettings?.intervalMinutes === interval.value && styles.intervalOptionTextSelected
-                  ]}>
-                    {interval.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* App Settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Settings</Text>
-          
-          <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Notifications</Text>
               <Text style={styles.settingDescription}>
@@ -250,7 +171,35 @@ const SettingsScreen = () => {
               thumbColor="white"
             />
           </View>
+
+          <View style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Blocking Interval</Text>
+            <Text style={styles.settingDescription}>
+              How long to use device before blocking
+            </Text>
+            <View style={styles.intervalOptions}>
+              {BLOCKING_INTERVALS.map((interval) => (
+                <TouchableOpacity
+                  key={interval.value}
+                  style={[
+                    styles.intervalOption,
+                    blockingSettings?.intervalMinutes === interval.value && styles.intervalOptionSelected
+                  ]}
+                  onPress={() => updateBlockingInterval(interval.value)}
+                >
+                  <Text style={[
+                    styles.intervalOptionText,
+                    blockingSettings?.intervalMinutes === interval.value && styles.intervalOptionTextSelected
+                  ]}>
+                    {interval.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         </View>
+
+
 
         {/* Statistics */}
         <View style={styles.section}>
@@ -268,24 +217,7 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        {/* Data Management */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Data Management</Text>
-          
-          <TouchableOpacity
-            style={styles.dangerButton}
-            onPress={handleResetStats}
-          >
-            <Text style={styles.dangerButtonText}>Reset Statistics</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.dangerButton, styles.dangerButtonDestructive]}
-            onPress={handleClearAllData}
-          >
-            <Text style={styles.dangerButtonText}>Clear All Data</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* App Info */}
         <View style={styles.section}>
@@ -417,23 +349,7 @@ const styles = StyleSheet.create({
     color: theme.semanticColors.textSecondary,
     textAlign: 'center',
   },
-  dangerButton: {
-    backgroundColor: theme.semanticColors.surface,
-    padding: theme.spacing[4],
-    borderRadius: theme.borderRadius.lg,
-    alignItems: 'center',
-    marginBottom: theme.spacing[3],
-    borderWidth: 1,
-    borderColor: theme.semanticColors.borderLight,
-  },
-  dangerButtonDestructive: {
-    borderColor: theme.semanticColors.error,
-  },
-  dangerButtonText: {
-    ...theme.typography.text.body,
-    color: theme.semanticColors.error,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
+
   infoContainer: {
     alignItems: 'center',
   },

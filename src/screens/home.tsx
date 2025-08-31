@@ -1,26 +1,57 @@
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { ProgressSummary } from "widgets";
-import { blockingService } from "shared/lib/services";
+import { blockingService, usageTrackingService } from "shared/lib/services";
+import React, { useEffect, useState } from "react";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    // Start tracking usage when home screen loads
+    usageTrackingService.startSession('Home');
+    
+    // Refresh progress summary every 30 seconds to keep time usage updated
+    const interval = setInterval(() => {
+      setRefreshKey(prev => prev + 1);
+    }, 30000);
+    
+    return () => {
+      // End session when component unmounts
+      usageTrackingService.endCurrentSession();
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Refresh when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      usageTrackingService.startSession('Home');
+      setRefreshKey(prev => prev + 1);
+    }, [])
+  );
 
   const handleViewStatistics = () => {
+    usageTrackingService.startSession('Statistics');
     navigation.navigate('Statistics' as never);
   };
 
   const handleStartLearning = () => {
+    usageTrackingService.startSession('WordList');
     navigation.navigate('WordList' as never);
   };
 
   const handleSettings = () => {
+    usageTrackingService.startSession('Settings');
     navigation.navigate('Settings' as never);
   };
 
   const handleTestBlock = async () => {
     try {
       await blockingService.simulateBlock();
+      usageTrackingService.startSession('Block');
       navigation.navigate('Block' as never);
     } catch (error) {
       console.error('Failed to trigger test block:', error);
@@ -36,6 +67,7 @@ const HomeScreen = () => {
         </View>
         
         <ProgressSummary 
+          key={refreshKey}
           onPress={handleViewStatistics}
           compact={true}
         />
@@ -47,15 +79,26 @@ const HomeScreen = () => {
             activeOpacity={0.8}
           >
             <Text style={styles.primaryButtonText}>Start Learning</Text>
+            <Text style={styles.primaryButtonSubtext}>Browse and learn new words</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={handleSettings}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.secondaryButtonText}>Settings</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleViewStatistics}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.secondaryButtonText}>Statistics</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={handleSettings}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.secondaryButtonText}>Settings</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={styles.testButton}
@@ -127,6 +170,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
+  primaryButtonSubtext: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    fontWeight: '400',
+    marginTop: 4,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   secondaryButton: {
     backgroundColor: 'white',
     padding: 18,
@@ -139,6 +192,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
+    flex: 1,
   },
   secondaryButtonText: {
     color: '#007AFF',

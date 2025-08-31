@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
+import { usageTrackingService } from 'shared/lib/services';
 import { StatisticsCard } from 'features/statistics';
 
 interface ProgressSummaryProps {
@@ -18,13 +20,36 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
 
   useEffect(() => {
     loadStatistics();
+    
+    // Refresh statistics every 30 seconds to keep time usage updated
+    const interval = setInterval(() => {
+      loadStatistics();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
+
+  // Refresh statistics when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadStatistics();
+    }, [])
+  );
 
   const loadStatistics = async () => {
     try {
       setError(null);
-      const stats = await storageService.getStatistics();
-      setStatistics(stats);
+      const [stats, totalUsageTime, todayUsageTime] = await Promise.all([
+        storageService.getStatistics(),
+        usageTrackingService.getTotalUsageTime(),
+        usageTrackingService.getTodayUsageTime(),
+      ]);
+      
+      setStatistics({
+        ...stats,
+        totalUsageTime,
+        todayUsageTime,
+      });
     } catch (err) {
       setError('Unable to load progress data');
     } finally {
@@ -97,7 +122,7 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
           </View>
           <View style={styles.compactStat}>
             <Text style={[styles.compactValue, { color: '#AF52DE' }]}>
-              {formatTime(statistics.totalTimeSpent)}
+              {formatTime(statistics.totalUsageTime || statistics.totalTimeSpent)}
             </Text>
             <Text style={styles.compactLabel}>Time Spent</Text>
           </View>
@@ -126,7 +151,7 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
           />
           <StatisticsCard
             title="Time Spent"
-            value={formatTime(statistics.totalTimeSpent)}
+            value={formatTime(statistics.totalUsageTime || statistics.totalTimeSpent)}
             color="#AF52DE"
             size="small"
           />

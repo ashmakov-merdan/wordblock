@@ -15,7 +15,7 @@ class StorageService {
   private defaultBlockingSettings: BlockingSettings = STORAGE_CONFIG.DEFAULTS.BLOCKING_SETTINGS;
   private defaultAppSettings: AppSettings = STORAGE_CONFIG.DEFAULTS.APP_SETTINGS;
 
-  private async setItem<T>(key: string, value: T): Promise<void> {
+  async setItem<T>(key: string, value: T): Promise<void> {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(value));
     } catch (error) {

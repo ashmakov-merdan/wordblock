@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
+import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 
 const BlockScreen = () => {
@@ -20,6 +21,11 @@ const BlockScreen = () => {
   useEffect(() => {
     loadBlockingSettings();
     startTimer();
+    usageTrackingService.startSession('Block');
+    
+    return () => {
+      usageTrackingService.endCurrentSession();
+    };
   }, []);
 
   const loadBlockingSettings = async () => {
