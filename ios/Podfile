@@ -19,7 +19,7 @@ target 'WordBlock' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
+    :new_arch_enabled => true,
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
