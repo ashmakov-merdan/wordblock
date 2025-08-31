@@ -50,6 +50,15 @@ const StatisticsScreen = () => {
         usageTrackingService.getTodayUsageTime(),
       ]);
 
+      console.log('Statistics Data:', {
+        stats,
+        dailyUsage: dailyUsage.length,
+        weeklyUsage: weeklyUsage.length,
+        monthlyUsage: monthlyUsage.length,
+        totalUsageTime,
+        todayUsageTime,
+      });
+      
       setData({
         ...stats,
         totalUsageTime,
@@ -76,19 +85,28 @@ const StatisticsScreen = () => {
     };
   }, [loadData]);
 
-  const formatTime = (milliseconds: number): string => {
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
-  };
+  // Debug: Check if usage sessions exist
+  useEffect(() => {
+    const checkUsageSessions = async () => {
+      try {
+        const sessions = await usageTrackingService.getSessions();
+        console.log('Total Usage Sessions:', sessions.length);
+        if (sessions.length > 0) {
+          console.log('Sample Session:', sessions[0]);
+        }
+      } catch (error) {
+        console.error('Error checking usage sessions:', error);
+      }
+    };
+    
+    checkUsageSessions();
+  }, []);
 
   const getChartData = () => {
     if (!data) return [];
 
+    console.log('Current Chart Filter:', chartFilter);
+    
     switch (chartFilter) {
       case 'daily':
         return getDailyData();
@@ -104,9 +122,11 @@ const StatisticsScreen = () => {
   const getDailyData = () => {
     if (!data?.dailyUsage) return [];
 
+    console.log('Daily Usage Data:', data.dailyUsage);
+    
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
-    const weekData = [];
+    const weekData: Array<{label: string; value: number; color: string}> = [];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
@@ -121,60 +141,53 @@ const StatisticsScreen = () => {
       });
     }
 
+    console.log('Daily Chart Data:', weekData);
     return weekData;
   };
 
   const getWeeklyData = () => {
     if (!data?.weeklyUsage) return [];
 
-    const today = new Date();
-    const weekData = [];
+    console.log('Weekly Usage Data:', data.weeklyUsage);
+    
+    const weekData: Array<{label: string; value: number; color: string}> = [];
+    const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
-    for (let i = 3; i >= 0; i--) {
-      const weekStart = new Date(today);
-      weekStart.setDate(weekStart.getDate() - (i * 7));
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-
-      const weekUsage = data.weeklyUsage.filter(usage => {
-        const usageDate = new Date(usage.date);
-        return usageDate >= weekStart && usageDate <= weekEnd;
-      });
-
-      const totalTime = weekUsage.reduce((sum, day) => sum + day.totalTime, 0);
+    // Take the last 4 weeks of data
+    const recentWeeks = data.weeklyUsage.slice(-4);
+    
+    recentWeeks.forEach((week, index) => {
       weekData.push({
-        label: `Week ${4 - i}`,
-        value: Math.round(totalTime / (1000 * 60)),
+        label: weekLabels[index] || `Week ${index + 1}`,
+        value: Math.round(week.totalTime / (1000 * 60)),
         color: theme.semanticColors.success,
       });
-    }
+    });
 
+    console.log('Weekly Chart Data:', weekData);
     return weekData;
   };
 
   const getMonthlyData = () => {
     if (!data?.monthlyUsage) return [];
 
-    const today = new Date();
-    const monthData = [];
+    console.log('Monthly Usage Data:', data.monthlyUsage);
+    
+    const monthData: Array<{label: string; value: number; color: string}> = [];
 
-    for (let i = 5; i >= 0; i--) {
-      const monthStart = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthEnd = new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
-
-      const monthUsage = data.monthlyUsage.filter(usage => {
-        const usageDate = new Date(usage.date);
-        return usageDate >= monthStart && usageDate <= monthEnd;
-      });
-
-      const totalTime = monthUsage.reduce((sum, day) => sum + day.totalTime, 0);
+    // Take the last 6 months of data
+    const recentMonths = data.monthlyUsage.slice(-6);
+    
+    recentMonths.forEach((month) => {
+      const monthDate = new Date(month.date);
       monthData.push({
-        label: monthStart.toLocaleDateString('en-US', { month: 'short' }),
-        value: Math.round(totalTime / (1000 * 60)),
+        label: monthDate.toLocaleDateString('en-US', { month: 'short' }),
+        value: Math.round(month.totalTime / (1000 * 60)),
         color: theme.semanticColors.warning,
       });
-    }
+    });
 
+    console.log('Monthly Chart Data:', monthData);
     return monthData;
   };
 
@@ -224,11 +237,18 @@ const StatisticsScreen = () => {
               />
             </View>
           </View>
-          <BarChart
-            data={getChartData()}
-            height={250}
-            showValues={true}
-          />
+          {(() => {
+            const chartData = getChartData();
+            console.log('Chart Data for BarChart:', chartData);
+            return (
+              <BarChart
+                data={chartData}
+                height={250}
+                showValues={true}
+                title="Usage Analytics"
+              />
+            );
+          })()}
         </View>
 
         {/* Additional Metrics */}
@@ -239,16 +259,6 @@ const StatisticsScreen = () => {
               value={data.longestStreak}
               label="Longest Streak"
               unit="days"
-            />
-            <MetricsCard
-              value={formatTime(data.todayUsageTime || 0)}
-              label="Today's Usage"
-              unit="app time"
-            />
-            <MetricsCard
-              value={formatTime(data.averageSessionTime)}
-              label="Average Session"
-              unit="duration"
             />
             <MetricsCard
               value={data.totalBlocksTriggered}
@@ -373,26 +383,6 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     gap: theme.spacing[2],
-  },
-  filterButton: {
-    paddingHorizontal: theme.spacing[3],
-    paddingVertical: theme.spacing[2],
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 1,
-    borderColor: theme.semanticColors.borderLight,
-    backgroundColor: theme.semanticColors.surface,
-  },
-  filterButtonActive: {
-    backgroundColor: theme.semanticColors.brand,
-    borderColor: theme.semanticColors.brand,
-  },
-  filterButtonText: {
-    ...theme.typography.text.bodySmall,
-    color: theme.semanticColors.textPrimary,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  filterButtonTextActive: {
-    color: 'white',
   },
   cardsContainer: {
     gap: theme.spacing[3],

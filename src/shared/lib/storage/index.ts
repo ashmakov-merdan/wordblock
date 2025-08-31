@@ -189,6 +189,10 @@ class StorageService {
     await this.setItem(STORAGE_KEYS.STUDY_SESSIONS, sessions);
   }
 
+  async getUsageSessions(): Promise<any[]> {
+    return this.getItem<any[]>('usage_sessions', []);
+  }
+
   async startStudySession(): Promise<StudySession> {
     const session: StudySession = {
       id: this.generateId(),

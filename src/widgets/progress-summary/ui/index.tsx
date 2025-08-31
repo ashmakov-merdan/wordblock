@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
-import { usageTrackingService } from 'shared/lib/services';
 import { StatisticsCard } from 'features/statistics';
 
 interface ProgressSummaryProps {
@@ -38,32 +37,18 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
   const loadStatistics = async () => {
     try {
       setError(null);
-      const [stats, totalUsageTime, todayUsageTime] = await Promise.all([
+      const [stats] = await Promise.all([
         storageService.getStatistics(),
-        usageTrackingService.getTotalUsageTime(),
-        usageTrackingService.getTodayUsageTime(),
       ]);
       
       setStatistics({
         ...stats,
-        totalUsageTime,
-        todayUsageTime,
       });
     } catch (err) {
       setError('Unable to load progress data');
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatTime = (milliseconds: number): string => {
-    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes}m`;
   };
 
   if (loading) {
@@ -132,15 +117,6 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
             </Text>
             <Text style={styles.compactLabel}>Day Streak</Text>
           </View>
-          <View style={styles.compactStat}>
-            <View style={styles.compactStatIcon}>
-              <Text style={styles.compactStatIconText}>⏱️</Text>
-            </View>
-            <Text style={[styles.compactValue, { color: '#AF52DE' }]}>
-              {formatTime(statistics.totalUsageTime || statistics.totalTimeSpent)}
-            </Text>
-            <Text style={styles.compactLabel}>Time Spent</Text>
-          </View>
         </View>
       ) : (
         <View style={styles.statsGrid}>
@@ -162,12 +138,6 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
             value={statistics.currentStreak}
             subtitle="days"
             color="#FF9500"
-            size="small"
-          />
-          <StatisticsCard
-            title="Time Spent"
-            value={formatTime(statistics.totalUsageTime || statistics.totalTimeSpent)}
-            color="#AF52DE"
             size="small"
           />
         </View>
