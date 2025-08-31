@@ -50,61 +50,51 @@ export const theme = {
       h1: {
         fontSize: 36,
         fontWeight: '800',
-        lineHeight: 1.2,
         letterSpacing: -0.8,
       },
       h2: {
         fontSize: 28,
         fontWeight: '700',
-        lineHeight: 1.3,
         letterSpacing: -0.5,
       },
       h3: {
         fontSize: 24,
         fontWeight: '700',
-        lineHeight: 1.4,
         letterSpacing: -0.3,
       },
       h4: {
         fontSize: 20,
         fontWeight: '600',
-        lineHeight: 1.4,
         letterSpacing: -0.2,
       },
       body: {
         fontSize: 16,
         fontWeight: '400',
-        lineHeight: 1.5,
         letterSpacing: 0,
       },
       bodyLarge: {
         fontSize: 18,
         fontWeight: '400',
-        lineHeight: 1.5,
         letterSpacing: 0.1,
       },
       bodySmall: {
         fontSize: 14,
         fontWeight: '400',
-        lineHeight: 1.4,
         letterSpacing: 0.1,
       },
       caption: {
         fontSize: 12,
         fontWeight: '500',
-        lineHeight: 1.3,
         letterSpacing: 0.2,
       },
       button: {
         fontSize: 16,
         fontWeight: '600',
-        lineHeight: 1.4,
         letterSpacing: 0.2,
       },
       buttonLarge: {
         fontSize: 18,
         fontWeight: '700',
-        lineHeight: 1.4,
         letterSpacing: 0.3,
       },
     },
@@ -201,10 +191,10 @@ export const theme = {
   layout: {
     // Screen padding
     screenPadding: 20,
-    
+
     // Card padding
     cardPadding: 24,
-    
+
     // Button padding
     buttonPadding: {
       sm: { horizontal: 12, vertical: 8 },
@@ -257,7 +247,7 @@ export type Theme = typeof theme;
 export const getThemeValue = (path: string) => {
   const keys = path.split('.');
   let value: any = theme;
-  
+
   for (const key of keys) {
     value = value[key];
     if (value === undefined) {
@@ -265,10 +255,19 @@ export const getThemeValue = (path: string) => {
       return undefined;
     }
   }
-  
+
   return value;
 };
 
 // Export individual theme sections for convenience
-export const { colors: themeColors, semanticColors: themeSemanticColors } = theme;
-export const { typography, spacing, borderRadius, shadows, layout, animation, zIndex } = theme;
+export const { colors: themeColors, semanticColors: themeSemanticColors } =
+  theme;
+export const {
+  typography,
+  spacing,
+  borderRadius,
+  shadows,
+  layout,
+  animation,
+  zIndex,
+} = theme;

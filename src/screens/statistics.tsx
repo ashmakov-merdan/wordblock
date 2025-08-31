@@ -56,7 +56,6 @@ const StatisticsScreen = () => {
     return `${minutes}m`;
   };
 
-  // Sample data for charts
   const weeklyProgressData = [
     { label: 'Mon', value: 5 },
     { label: 'Tue', value: 8 },
@@ -312,7 +311,6 @@ const styles = StyleSheet.create({
   loadingText: {
     ...theme.typography.text.body,
     color: theme.semanticColors.textSecondary,
-    marginTop: theme.spacing[4],
   },
   errorContainer: {
     flex: 1,
@@ -396,7 +394,6 @@ const styles = StyleSheet.create({
   insightDescription: {
     ...theme.typography.text.bodySmall,
     color: theme.semanticColors.textSecondary,
-    lineHeight: theme.typography.lineHeight.relaxed,
   },
 });
 
