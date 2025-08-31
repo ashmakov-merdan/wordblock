@@ -121,8 +121,6 @@ const StatisticsScreen = () => {
 
   const getDailyData = () => {
     if (!data?.dailyUsage) return [];
-
-    console.log('Daily Usage Data:', data.dailyUsage);
     
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
@@ -141,19 +139,15 @@ const StatisticsScreen = () => {
       });
     }
 
-    console.log('Daily Chart Data:', weekData);
     return weekData;
   };
 
   const getWeeklyData = () => {
     if (!data?.weeklyUsage) return [];
 
-    console.log('Weekly Usage Data:', data.weeklyUsage);
-    
     const weekData: Array<{label: string; value: number; color: string}> = [];
     const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
-    // Take the last 4 weeks of data
     const recentWeeks = data.weeklyUsage.slice(-4);
     
     recentWeeks.forEach((week, index) => {
@@ -171,11 +165,8 @@ const StatisticsScreen = () => {
   const getMonthlyData = () => {
     if (!data?.monthlyUsage) return [];
 
-    console.log('Monthly Usage Data:', data.monthlyUsage);
-    
     const monthData: Array<{label: string; value: number; color: string}> = [];
 
-    // Take the last 6 months of data
     const recentMonths = data.monthlyUsage.slice(-6);
     
     recentMonths.forEach((month) => {
@@ -186,8 +177,6 @@ const StatisticsScreen = () => {
         color: theme.semanticColors.warning,
       });
     });
-
-    console.log('Monthly Chart Data:', monthData);
     return monthData;
   };
 
