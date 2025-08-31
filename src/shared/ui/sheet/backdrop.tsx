@@ -5,7 +5,7 @@ import Animated, { Extrapolate, interpolate, useAnimatedStyle } from "react-nati
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-const Backdrop = ({ animatedIndex, style, onPress }: BottomSheetBackdropProps & { onPress?: () => void }) => {
+export const Backdrop = ({ animatedIndex, style, onPress }: BottomSheetBackdropProps & { onPress?: () => void }) => {
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animatedIndex.value, [-1, 0], [0, 1], Extrapolate.CLAMP),
   }));

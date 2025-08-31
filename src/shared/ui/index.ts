@@ -1,2 +1,2 @@
-export { default as Sheet } from './sheet/modal';
+export * from './sheet';
 export { default as BarChart } from './bar-chart';

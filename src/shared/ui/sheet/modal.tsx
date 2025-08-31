@@ -1,7 +1,7 @@
 import { BottomSheetModal, BottomSheetModalProps, BottomSheetView } from "@gorhom/bottom-sheet";
 import { forwardRef, memo, ReactNode, useCallback } from "react";
 import { SharedValue } from "react-native-reanimated";
-import { colors } from "shared/theme";
+import { colors } from "shared/theme/colors";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -14,7 +14,7 @@ interface SheetProps extends Partial<BottomSheetModalProps> {
   onClose?: () => void;
 };
 
-const Sheet = memo(forwardRef<BottomSheetModal, SheetProps>(({ children, onClose, display, sizes, ...props }, ref) => {
+export const Sheet = memo(forwardRef<BottomSheetModal, SheetProps>(({ children, onClose, display, sizes, ...props }, ref) => {
   const { bottom } = useSafeAreaInsets();
 
   useFocusEffect(
@@ -30,7 +30,7 @@ const Sheet = memo(forwardRef<BottomSheetModal, SheetProps>(({ children, onClose
       enablePanDownToClose
       backdropComponent={(props) => <Backdrop onPress={onClose} {...props} />}
       handleIndicatorStyle={{
-        backgroundColor: colors.neutral.ashGray
+        backgroundColor: colors.neutral[200]
       }}
       {...props}
     >

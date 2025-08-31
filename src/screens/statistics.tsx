@@ -12,6 +12,7 @@ import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 import { ProgressSummary } from 'widgets';
+import { ChartFilters, MetricsCard } from 'features/statistics';
 
 interface ChartData {
   totalWords: number;
@@ -27,20 +28,24 @@ interface ChartData {
   totalUsageTime: number;
   todayUsageTime: number;
   dailyUsage: any[];
+  weeklyUsage: any[];
+  monthlyUsage: any[];
 }
 
 const StatisticsScreen = () => {
-
   const [data, setData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chartFilter, setChartFilter] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
   const loadData = React.useCallback(async () => {
     try {
       setError(null);
-      const [stats, dailyUsage, totalUsageTime, todayUsageTime] = await Promise.all([
+      const [stats, dailyUsage, weeklyUsage, monthlyUsage, totalUsageTime, todayUsageTime] = await Promise.all([
         storageService.getStatistics(),
         usageTrackingService.getDailyUsage(7),
+        usageTrackingService.getDailyUsage(28), // For weekly view
+        usageTrackingService.getDailyUsage(90), // For monthly view
         usageTrackingService.getTotalUsageTime(),
         usageTrackingService.getTodayUsageTime(),
       ]);
@@ -50,6 +55,8 @@ const StatisticsScreen = () => {
         totalUsageTime,
         todayUsageTime,
         dailyUsage,
+        weeklyUsage,
+        monthlyUsage,
       });
     } catch (err) {
       setError('Unable to load statistics data');
@@ -79,18 +86,23 @@ const StatisticsScreen = () => {
     return `${minutes}m`;
   };
 
-  const getSessionTimeData = () => {
-    if (!data?.dailyUsage) return [];
+  const getChartData = () => {
+    if (!data) return [];
 
-    const colors = [
-      theme.semanticColors.brand,
-      theme.semanticColors.success,
-      theme.semanticColors.warning,
-      theme.colors.purple[500],
-      theme.semanticColors.error,
-      theme.semanticColors.brand,
-      theme.semanticColors.success,
-    ];
+    switch (chartFilter) {
+      case 'daily':
+        return getDailyData();
+      case 'weekly':
+        return getWeeklyData();
+      case 'monthly':
+        return getMonthlyData();
+      default:
+        return getDailyData();
+    }
+  };
+
+  const getDailyData = () => {
+    if (!data?.dailyUsage) return [];
 
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
@@ -105,11 +117,65 @@ const StatisticsScreen = () => {
       weekData.push({
         label: weekDays[date.getDay()],
         value: dayUsage ? Math.round(dayUsage.totalTime / (1000 * 60)) : 0,
-        color: colors[i],
+        color: theme.semanticColors.brand,
       });
     }
 
     return weekData;
+  };
+
+  const getWeeklyData = () => {
+    if (!data?.weeklyUsage) return [];
+
+    const today = new Date();
+    const weekData = [];
+
+    for (let i = 3; i >= 0; i--) {
+      const weekStart = new Date(today);
+      weekStart.setDate(weekStart.getDate() - (i * 7));
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const weekUsage = data.weeklyUsage.filter(usage => {
+        const usageDate = new Date(usage.date);
+        return usageDate >= weekStart && usageDate <= weekEnd;
+      });
+
+      const totalTime = weekUsage.reduce((sum, day) => sum + day.totalTime, 0);
+      weekData.push({
+        label: `Week ${4 - i}`,
+        value: Math.round(totalTime / (1000 * 60)),
+        color: theme.semanticColors.success,
+      });
+    }
+
+    return weekData;
+  };
+
+  const getMonthlyData = () => {
+    if (!data?.monthlyUsage) return [];
+
+    const today = new Date();
+    const monthData = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const monthStart = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthEnd = new Date(today.getFullYear(), today.getMonth() - i + 1, 0);
+
+      const monthUsage = data.monthlyUsage.filter(usage => {
+        const usageDate = new Date(usage.date);
+        return usageDate >= monthStart && usageDate <= monthEnd;
+      });
+
+      const totalTime = monthUsage.reduce((sum, day) => sum + day.totalTime, 0);
+      monthData.push({
+        label: monthStart.toLocaleDateString('en-US', { month: 'short' }),
+        value: Math.round(totalTime / (1000 * 60)),
+        color: theme.semanticColors.warning,
+      });
+    }
+
+    return monthData;
   };
 
   if (loading) {
@@ -147,13 +213,19 @@ const StatisticsScreen = () => {
           </View>
         </View>
 
-        {/* Session Time Analysis */}
+        {/* Usage Analytics */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Session Time Analysis</Text>
+          <View style={styles.chartHeader}>
+            <Text style={styles.sectionTitle}>Usage Analytics</Text>
+            <View style={styles.filterContainer}>
+              <ChartFilters
+                filter={chartFilter}
+                onFilterChange={setChartFilter}
+              />
+            </View>
+          </View>
           <BarChart
-            data={getSessionTimeData()}
-            title="Daily App Usage"
-            subtitle="Minutes spent using the app each day"
+            data={getChartData()}
             height={250}
             showValues={true}
           />
@@ -163,26 +235,26 @@ const StatisticsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Additional Metrics</Text>
           <View style={styles.metricsGrid}>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{data.longestStreak}</Text>
-              <Text style={styles.metricLabel}>Longest Streak</Text>
-              <Text style={styles.metricUnit}>days</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{formatTime(data.todayUsageTime || 0)}</Text>
-              <Text style={styles.metricLabel}>Today's Usage</Text>
-              <Text style={styles.metricUnit}>app time</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{formatTime(data.averageSessionTime)}</Text>
-              <Text style={styles.metricLabel}>Average Session</Text>
-              <Text style={styles.metricUnit}>duration</Text>
-            </View>
-            <View style={styles.metricCard}>
-              <Text style={styles.metricValue}>{data.totalBlocksTriggered}</Text>
-              <Text style={styles.metricLabel}>Blocks Triggered</Text>
-              <Text style={styles.metricUnit}>screen time managed</Text>
-            </View>
+            <MetricsCard
+              value={data.longestStreak}
+              label="Longest Streak"
+              unit="days"
+            />
+            <MetricsCard
+              value={formatTime(data.todayUsageTime || 0)}
+              label="Today's Usage"
+              unit="app time"
+            />
+            <MetricsCard
+              value={formatTime(data.averageSessionTime)}
+              label="Average Session"
+              unit="duration"
+            />
+            <MetricsCard
+              value={data.totalBlocksTriggered}
+              label="Blocks Triggered"
+              unit="screen time managed"
+            />
           </View>
         </View>
 
@@ -292,6 +364,36 @@ const styles = StyleSheet.create({
     color: theme.semanticColors.textPrimary,
     marginBottom: theme.spacing[4],
   },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing[4],
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    gap: theme.spacing[2],
+  },
+  filterButton: {
+    paddingHorizontal: theme.spacing[3],
+    paddingVertical: theme.spacing[2],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.semanticColors.borderLight,
+    backgroundColor: theme.semanticColors.surface,
+  },
+  filterButtonActive: {
+    backgroundColor: theme.semanticColors.brand,
+    borderColor: theme.semanticColors.brand,
+  },
+  filterButtonText: {
+    ...theme.typography.text.bodySmall,
+    color: theme.semanticColors.textPrimary,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  filterButtonTextActive: {
+    color: 'white',
+  },
   cardsContainer: {
     gap: theme.spacing[3],
   },
@@ -303,33 +405,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-  },
-  metricCard: {
-    backgroundColor: theme.semanticColors.surface,
-    padding: theme.spacing[4],
-    borderRadius: theme.borderRadius.lg,
-    width: '48%',
-    marginBottom: theme.spacing[3],
-    alignItems: 'center',
-    ...theme.shadows.md,
-  },
-  metricValue: {
-    ...theme.typography.text.h2,
-    color: theme.semanticColors.brand,
-    fontWeight: theme.typography.fontWeight.bold,
-  },
-  metricLabel: {
-    ...theme.typography.text.bodySmall,
-    color: theme.semanticColors.textPrimary,
-    fontWeight: theme.typography.fontWeight.medium,
-    textAlign: 'center',
-    marginTop: theme.spacing[1],
-  },
-  metricUnit: {
-    ...theme.typography.text.caption,
-    color: theme.semanticColors.textSecondary,
-    textAlign: 'center',
-    marginTop: theme.spacing[1],
   },
   insightsContainer: {
     gap: theme.spacing[4],
