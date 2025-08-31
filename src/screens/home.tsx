@@ -1,6 +1,7 @@
 import { Text, View, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ProgressSummary } from "widgets";
+import { blockingService } from "shared/lib/services";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -10,13 +11,20 @@ const HomeScreen = () => {
   };
 
   const handleStartLearning = () => {
-    // TODO: Navigate to Word List screen when implemented
-    // navigation.navigate('WordList' as never);
+    navigation.navigate('WordList' as never);
   };
 
   const handleSettings = () => {
-    // TODO: Navigate to Settings screen when implemented
-    // navigation.navigate('Settings' as never);
+    navigation.navigate('Settings' as never);
+  };
+
+  const handleTestBlock = async () => {
+    try {
+      await blockingService.simulateBlock();
+      navigation.navigate('Block' as never);
+    } catch (error) {
+      console.error('Failed to trigger test block:', error);
+    }
   };
 
   return (
@@ -47,6 +55,14 @@ const HomeScreen = () => {
             activeOpacity={0.8}
           >
             <Text style={styles.secondaryButtonText}>Settings</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.testButton}
+            onPress={handleTestBlock}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.testButtonText}>Test Block Flow</Text>
           </TouchableOpacity>
         </View>
 
@@ -129,6 +145,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     letterSpacing: 0.2,
+  },
+  testButton: {
+    backgroundColor: '#FF9500',
+    padding: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 16,
+    shadowColor: '#FF9500',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  testButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   footer: {
     padding: 24,
