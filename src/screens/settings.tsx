@@ -4,16 +4,16 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   ScrollView,
   Switch,
-  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 import { BlockingSettings, AppSettings } from 'shared/lib/types';
+import { CaretLeftIcon } from 'phosphor-react-native';
 
 const BLOCKING_INTERVALS = [
   { label: '15 minutes', value: 15 },
@@ -117,7 +117,8 @@ const SettingsScreen = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <CaretLeftIcon size={20} color="#8E8E93" />
+          <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
         <View style={styles.headerSpacer} />
@@ -217,17 +218,6 @@ const SettingsScreen = () => {
             </View>
           </View>
         </View>
-
-
-
-        {/* App Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <View style={styles.infoContainer}>
-            <Text style={styles.infoText}>WordBlock v0.0.1</Text>
-            <Text style={styles.infoText}>Learn words while managing screen time</Text>
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -249,6 +239,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: theme.spacing[2],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
   },
   backButtonText: {
     ...theme.typography.text.body,

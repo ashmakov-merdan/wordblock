@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
 import { theme } from 'shared/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeftIcon, CheckCircleIcon, WarningIcon, XCircleIcon, LightbulbIcon } from 'phosphor-react-native';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -24,10 +25,10 @@ const AddWordScreen = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [loading, setLoading] = useState(false);
 
-  const difficulties: { value: Difficulty; label: string; color: string }[] = [
-    { value: 'easy', label: 'Easy', color: theme.semanticColors.success },
-    { value: 'medium', label: 'Medium', color: theme.semanticColors.warning },
-    { value: 'hard', label: 'Hard', color: theme.semanticColors.error },
+  const difficulties: { value: Difficulty; label: string; color: string; icon: React.ReactNode }[] = [
+    { value: 'easy', label: 'Easy', color: theme.semanticColors.success, icon: <CheckCircleIcon size={20} color={theme.semanticColors.success} /> },
+    { value: 'medium', label: 'Medium', color: theme.semanticColors.warning, icon: <WarningIcon size={20} color={theme.semanticColors.warning} /> },
+    { value: 'hard', label: 'Hard', color: theme.semanticColors.error, icon: <XCircleIcon size={20} color={theme.semanticColors.error} /> },
   ];
 
   const validateForm = (): string | null => {
@@ -191,10 +192,7 @@ const AddWordScreen = () => {
                   ]}
                   onPress={() => setDifficulty(diff.value)}
                 >
-                  <View style={[
-                    styles.difficultyIndicator,
-                    { backgroundColor: diff.color }
-                  ]} />
+                  {diff.icon}
                   <Text style={[
                     styles.difficultyText,
                     difficulty === diff.value && styles.difficultyTextSelected
@@ -208,7 +206,10 @@ const AddWordScreen = () => {
 
           {/* Tips Section */}
           <View style={styles.tipsSection}>
-            <Text style={styles.tipsTitle}>💡 Tips for Adding Words</Text>
+            <View style={styles.tipsTitleContainer}>
+              <LightbulbIcon size={20} color="#FF9500" />
+              <Text style={styles.tipsTitle}> Tips for Adding Words</Text>
+            </View>
             <View style={styles.tipItem}>
               <Text style={styles.tipText}>• Keep definitions clear and concise</Text>
             </View>
@@ -350,11 +351,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.semanticColors.borderLight,
   },
+  tipsTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing[3],
+  },
   tipsTitle: {
     ...theme.typography.text.body,
     color: theme.semanticColors.textPrimary,
     fontWeight: theme.typography.fontWeight.bold,
-    marginBottom: theme.spacing[3],
   },
   tipItem: {
     marginBottom: theme.spacing[2],

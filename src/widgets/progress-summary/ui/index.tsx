@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { useFocusEffect } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
 import { StatisticsCard } from 'features/statistics';
+import { BookOpenIcon, ArrowRightIcon } from 'phosphor-react-native';
 
 interface ProgressSummaryProps {
   onPress?: () => void;
@@ -85,7 +86,7 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
         {onPress && (
           <TouchableOpacity style={styles.viewAllButton} onPress={onPress}>
             <Text style={styles.viewAllText}>View All</Text>
-            <Text style={styles.viewAllArrow}>→</Text>
+            <ArrowRightIcon size={16} color="#007AFF" />
           </TouchableOpacity>
         )}
       </View>
@@ -94,7 +95,7 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
         <View style={styles.compactGrid}>
           <View style={styles.compactStat}>
             <View style={styles.compactStatIcon}>
-              <Text style={styles.compactStatIconText}>📚</Text>
+              <BookOpenIcon size={24} color="#007AFF" />
             </View>
             <Text style={styles.compactValue}>{statistics.totalWords}</Text>
             <Text style={styles.compactLabel}>Total Words</Text>

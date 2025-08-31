@@ -1,8 +1,10 @@
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Text, View, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { ProgressSummary } from "widgets";
-import { blockingService, usageTrackingService } from "shared/lib/services";
+import { usageTrackingService } from "shared/lib/services";
+import { Button } from "shared/ui";
+import { BookOpenIcon, ChartBarIcon, GearIcon, ArrowRightIcon } from "phosphor-react-native";
 import React, { useEffect, useState } from "react";
 
 const HomeScreen = () => {
@@ -46,16 +48,6 @@ const HomeScreen = () => {
     navigation.navigate('Settings' as never);
   };
 
-  const handleTestBlock = async () => {
-    try {
-      await blockingService.simulateBlock();
-      usageTrackingService.startSession('Block');
-      navigation.navigate('Block' as never);
-    } catch (error) {
-      console.error('Failed to trigger test block:', error);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -81,59 +73,32 @@ const HomeScreen = () => {
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Get Started</Text>
           
-          <TouchableOpacity
-            style={styles.primaryButton}
+          <Button
+            title="Start Learning"
+            subtitle="Browse and learn new words"
+            leftIcon={<BookOpenIcon size={24} color="#FFFFFF" />}
+            rightIcon={<ArrowRightIcon size={24} color="#FFFFFF" />}
             onPress={handleStartLearning}
-            activeOpacity={0.9}
-          >
-            <View style={styles.primaryButtonContent}>
-              <View style={styles.primaryButtonIcon}>
-                <Text style={styles.primaryButtonIconText}>📚</Text>
-              </View>
-              <View style={styles.primaryButtonTextContainer}>
-                <Text style={styles.primaryButtonText}>Start Learning</Text>
-                <Text style={styles.primaryButtonSubtext}>Browse and learn new words</Text>
-              </View>
-              <View style={styles.primaryButtonArrow}>
-                <Text style={styles.arrowText}>→</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            style={styles.primaryButton}
+          />
 
           <View style={styles.secondaryActionsGrid}>
-            <TouchableOpacity
-              style={styles.secondaryButton}
+            <Button
+              title="Statistics"
+              leftIcon={<ChartBarIcon size={24} color="#007AFF" />}
+              variant="secondary"
               onPress={handleViewStatistics}
-              activeOpacity={0.9}
-            >
-              <View style={styles.secondaryButtonIcon}>
-                <Text style={styles.secondaryButtonIconText}>📊</Text>
-              </View>
-              <Text style={styles.secondaryButtonText}>Statistics</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
               style={styles.secondaryButton}
-              onPress={handleSettings}
-              activeOpacity={0.9}
-            >
-              <View style={styles.secondaryButtonIcon}>
-                <Text style={styles.secondaryButtonIconText}>⚙️</Text>
-              </View>
-              <Text style={styles.secondaryButtonText}>Settings</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+            />
 
-        {/* Quick Actions */}
-        <View style={styles.quickActionsSection}>
-          <TouchableOpacity
-            style={styles.testButton}
-            onPress={handleTestBlock}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.testButtonText}>🧪 Test Block Flow</Text>
-          </TouchableOpacity>
+            <Button
+              title="Settings"
+              leftIcon={<GearIcon size={24} color="#007AFF" />}
+              variant="secondary"
+              onPress={handleSettings}
+              style={styles.secondaryButton}
+            />
+          </View>
         </View>
 
         {/* Footer */}

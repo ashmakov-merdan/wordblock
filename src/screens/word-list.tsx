@@ -3,10 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   FlatList,
   TextInput,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
 import { Word } from 'shared/lib/types';
+import { MagnifyingGlassIcon, CaretLeftIcon, PlusIcon } from 'phosphor-react-native';
 
 type FilterType = 'all' | 'learned' | 'unlearned';
 
@@ -206,7 +207,8 @@ const WordListScreen = () => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <CaretLeftIcon size={20} color="#8E8E93" />
+          <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Word List</Text>
@@ -216,14 +218,15 @@ const WordListScreen = () => {
           style={styles.addButton}
           onPress={() => navigation.navigate('AddWord' as never)}
         >
-          <Text style={styles.addButtonText}>+ Add</Text>
+          <PlusIcon size={20} color="white" />
+          <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <MagnifyingGlassIcon size={20} color="#8E8E93" />
           <TextInput
             style={styles.searchInput}
             placeholder="Search words or definitions..."
@@ -271,7 +274,7 @@ const WordListScreen = () => {
         onPress={() => navigation.navigate('AddWord' as never)}
         activeOpacity={0.8}
       >
-        <Text style={styles.fabText}>+</Text>
+        <PlusIcon size={20} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -303,6 +306,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: theme.spacing[2],
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
   },
   backButtonText: {
     ...theme.typography.text.body,
@@ -318,6 +324,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing[3],
     paddingVertical: theme.spacing[2],
     borderRadius: theme.borderRadius.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
   },
   addButtonText: {
     ...theme.typography.text.body,
