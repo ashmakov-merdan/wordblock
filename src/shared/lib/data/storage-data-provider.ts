@@ -9,7 +9,7 @@ export interface WordDataSource {
 
 // Sample word data source
 export class SampleWordDataSource implements WordDataSource {
-  name = 'Sample Words';
+  name = 'Sample Words'
 
   async loadWords(): Promise<Omit<Word, 'id' | 'createdAt' | 'reviewCount'>[]> {
     return [
@@ -71,7 +71,7 @@ export class SampleWordDataSource implements WordDataSource {
         word: 'Tenacity',
         definition: 'The quality or fact of being very determined; determination.',
         isLearned: false,
-        difficulty: DIFFICULTIES.HARD,
+        difficulty: DIFFICULTIES.MEDIUM,
       },
     ];
   }
@@ -87,11 +87,9 @@ export class JsonFileDataSource implements WordDataSource {
     try {
       // In a real implementation, this would load from a JSON file
       // For now, return empty array
-      console.log(`Loading words from: ${this.filePath}`);
       return [];
     } catch (error) {
-      console.error('Error loading words from JSON file:', error);
-      throw error;
+      throw new Error('Failed to load words from JSON file');
     }
   }
 }
@@ -105,11 +103,9 @@ export class ApiDataSource implements WordDataSource {
   async loadWords(): Promise<Omit<Word, 'id' | 'createdAt' | 'reviewCount'>[]> {
     try {
       // In a real implementation, this would fetch from an API
-      console.log(`Loading words from API: ${this.apiUrl}`);
       return [];
     } catch (error) {
-      console.error('Error loading words from API:', error);
-      throw error;
+      throw new Error('Failed to load words from API');
     }
   }
 }
@@ -151,11 +147,9 @@ export class WordDataProvider {
     }
 
     try {
-      console.log(`Loading words from: ${this.currentSource.name}`);
       return await this.currentSource.loadWords();
     } catch (error) {
-      console.error(`Error loading words from ${this.currentSource.name}:`, error);
-      throw error;
+      throw new Error(`Failed to load words from ${this.currentSource.name}`);
     }
   }
 
@@ -166,11 +160,9 @@ export class WordDataProvider {
     }
 
     try {
-      console.log(`Loading words from: ${source.name}`);
       return await source.loadWords();
     } catch (error) {
-      console.error(`Error loading words from ${source.name}:`, error);
-      throw error;
+      throw new Error(`Failed to load words from ${source.name}`);
     }
   }
 
@@ -182,26 +174,47 @@ export class WordDataProvider {
     return words.filter(word => word.difficulty === difficulty);
   }
 
-  // Utility method to validate word data
-  validateWordData(word: Omit<Word, 'id' | 'createdAt' | 'reviewCount'>): boolean {
+  // Validate word data
+  validateWordData(wordData: any): boolean {
     return (
-      word.word.trim().length > 0 &&
-      word.definition.trim().length > 0 &&
-      Object.values(DIFFICULTIES).includes(word.difficulty)
+      wordData &&
+      typeof wordData.word === 'string' &&
+      wordData.word.trim().length > 0 &&
+      typeof wordData.definition === 'string' &&
+      wordData.definition.trim().length > 0 &&
+      typeof wordData.isLearned === 'boolean' &&
+      Object.values(DIFFICULTIES).includes(wordData.difficulty)
     );
   }
 
-  // Utility method to clean word data
-  cleanWordData(word: Omit<Word, 'id' | 'createdAt' | 'reviewCount'>): Omit<Word, 'id' | 'createdAt' | 'reviewCount'> {
+  // Clean word data
+  cleanWordData(wordData: any): Omit<Word, 'id' | 'createdAt' | 'reviewCount'> {
     return {
-      word: word.word.trim(),
-      definition: word.definition.trim(),
-      isLearned: word.isLearned || false,
-      difficulty: word.difficulty,
+      word: wordData.word.trim(),
+      definition: wordData.definition.trim(),
+      isLearned: wordData.isLearned,
+      difficulty: wordData.difficulty,
+    };
+  }
+
+  // Get statistics about word data
+  getWordDataStats(words: Omit<Word, 'id' | 'createdAt' | 'reviewCount'>[]): {
+    total: number;
+    byDifficulty: Record<Difficulty, number>;
+  } {
+    const byDifficulty = {
+      easy: words.filter(w => w.difficulty === DIFFICULTIES.EASY).length,
+      medium: words.filter(w => w.difficulty === DIFFICULTIES.MEDIUM).length,
+      hard: words.filter(w => w.difficulty === DIFFICULTIES.HARD).length,
+    };
+
+    return {
+      total: words.length,
+      byDifficulty,
     };
   }
 }
 
 // Export singleton instance
-export const wordDataProvider = new WordDataProvider();
+const wordDataProvider = new WordDataProvider();
 export default wordDataProvider;

@@ -19,8 +19,7 @@ class StorageService {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
-      console.error(`Error saving ${key}:`, error);
-      throw error;
+      throw new Error(`Failed to save data for key: ${key}`);
     }
   }
 
@@ -29,7 +28,6 @@ class StorageService {
       const value = await AsyncStorage.getItem(key);
       return value ? JSON.parse(value) : defaultValue;
     } catch (error) {
-      console.error(`Error loading ${key}:`, error);
       return defaultValue;
     }
   }
@@ -267,8 +265,7 @@ class StorageService {
     try {
       await AsyncStorage.multiRemove(Object.values(STORAGE_KEYS));
     } catch (error) {
-      console.error('Error clearing data:', error);
-      throw error;
+      throw new Error('Failed to clear application data');
     }
   }
 

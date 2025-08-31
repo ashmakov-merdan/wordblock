@@ -10,8 +10,6 @@ class WordDataService {
       
       // Only add words if no words exist
       if (existingWords.length === 0) {
-        console.log('Initializing with words from provider...');
-        
         const words = await wordDataProvider.loadWordsFromCurrentSource();
         
         for (const wordData of words) {
@@ -21,12 +19,9 @@ class WordDataService {
             await storageService.addWord(cleanedWord);
           }
         }
-        
-        console.log(`Added ${words.length} words from provider`);
       }
     } catch (error) {
-      console.error('Error initializing words:', error);
-      throw error;
+      throw new Error('Failed to initialize word data');
     }
   }
 
@@ -43,11 +38,8 @@ class WordDataService {
           await storageService.addWord(cleanedWord);
         }
       }
-      
-      console.log(`Loaded ${words.length} words from ${sourceName}`);
     } catch (error) {
-      console.error(`Error loading words from ${sourceName}:`, error);
-      throw error;
+      throw new Error(`Failed to load words from ${sourceName}`);
     }
   }
 

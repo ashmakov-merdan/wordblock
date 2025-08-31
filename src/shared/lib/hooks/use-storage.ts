@@ -43,7 +43,6 @@ export const useStorage = () => {
       setStudySessions(sessionsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
-      console.error('Error loading data:', err);
     } finally {
       setLoading(false);
     }
@@ -241,7 +240,7 @@ export const useStorage = () => {
   const importData = useCallback(async (data: any) => {
     try {
       await storageService.importData(data);
-      await loadAllData(); // Reload all data
+      await loadAllData(); // Reload all data after import
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to import data');
       throw err;
@@ -258,7 +257,7 @@ export const useStorage = () => {
     }
   }, []);
 
-  const getWordsForStudy = useCallback(async (count: number = 10) => {
+  const getWordsForStudy = useCallback(async (count?: number) => {
     try {
       return await wordDataService.getWordsForStudy(count);
     } catch (err) {
@@ -267,11 +266,20 @@ export const useStorage = () => {
     }
   }, []);
 
-  const getWordsForReview = useCallback(async (count: number = 20) => {
+  const getWordsForReview = useCallback(async (count?: number) => {
     try {
       return await wordDataService.getWordsForReview(count);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to get words for review');
+      throw err;
+    }
+  }, []);
+
+  const incrementReviewCount = useCallback(async (wordId: string) => {
+    try {
+      await wordDataService.incrementReviewCount(wordId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to increment review count');
       throw err;
     }
   }, []);
@@ -286,6 +294,7 @@ export const useStorage = () => {
   }, []);
 
   return {
+    // State
     words,
     progress,
     blockingSettings,
@@ -315,6 +324,7 @@ export const useStorage = () => {
     getRandomWords,
     getWordsForStudy,
     getWordsForReview,
+    incrementReviewCount,
     getWordStats,
   };
 };
