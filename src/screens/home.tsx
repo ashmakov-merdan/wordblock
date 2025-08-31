@@ -10,9 +10,9 @@ const HomeScreen = () => {
       
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('UsageStatsTest' as never)}
+        onPress={() => navigation.navigate('StorageTest' as never)}
       >
-        <Text style={styles.buttonText}>Test Usage Stats Manager</Text>
+        <Text style={styles.buttonText}>Test Storage System</Text>
       </TouchableOpacity>
     </View>
   )
