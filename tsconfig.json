@@ -6,7 +6,8 @@
       "*": ["./src/*"],
       "@/*": ["./src/*"],
       "app/*": ["./src/app/*"],
-      "shared/*": ["./src/shared/*"]
+      "shared/*": ["./src/shared/*"],
+      "screens/*": ["./src/screens/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

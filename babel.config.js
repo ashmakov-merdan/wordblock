@@ -5,15 +5,26 @@ module.exports = {
       'module-resolver',
       {
         root: ['./src'],
-        extensions: ['.ios.ts', '.android.ts', '.ts', '.ios.tsx', '.android.tsx', '.tsx', '.jsx', '.js', '.json'],
+        extensions: [
+          '.ios.ts',
+          '.android.ts',
+          '.ts',
+          '.ios.tsx',
+          '.android.tsx',
+          '.tsx',
+          '.jsx',
+          '.js',
+          '.json',
+        ],
         alias: {
           '*': './src/*',
           'app/*': './src/app/*',
           'shared/*': './src/shared/*',
-        }
-      }
+          'screens/*': './src/screens/*',
+        },
+      },
     ],
     '@babel/plugin-proposal-export-namespace-from',
-    'react-native-worklets/plugin'
-  ]
+    'react-native-worklets/plugin',
+  ],
 };

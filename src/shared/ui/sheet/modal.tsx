@@ -1,7 +1,7 @@
 import { BottomSheetModal, BottomSheetModalProps, BottomSheetView } from "@gorhom/bottom-sheet";
 import { forwardRef, memo, ReactNode, useCallback } from "react";
 import { SharedValue } from "react-native-reanimated";
-import { colors } from "@/shared/theme";
+import { colors } from "shared/theme";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
