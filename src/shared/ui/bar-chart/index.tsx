@@ -1,13 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Rect, Text as SvgText, G } from 'react-native-svg';
-import { theme } from 'shared/theme';
+import { FC } from "react";
+import { Dimensions, View, Text, StyleSheet } from "react-native";
+import Svg, { G, Rect, Text as SvgText } from "react-native-svg";
+import { theme } from "shared/theme";
 
 interface BarChartData {
   label: string;
   value: number;
   color?: string;
-}
+};
 
 interface BarChartProps {
   data: BarChartData[];
@@ -19,14 +19,14 @@ interface BarChartProps {
   showValues?: boolean;
   barSpacing?: number;
   barWidth?: number;
-}
+};
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const BarChart: React.FC<BarChartProps> = ({
+const BarChart: FC<BarChartProps> =({
   data,
   height = 200,
-  width = screenWidth - 48, // Account for padding
+  width = screenWidth - 48,
   title,
   subtitle,
   maxValue,
@@ -155,5 +155,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing[1],
   },
 });
+
+BarChart.displayName = 'BarChart';
 
 export default BarChart;

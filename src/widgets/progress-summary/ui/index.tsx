@@ -18,6 +18,7 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   useEffect(() => {
     loadStatistics();
     
@@ -94,10 +95,14 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
   const content = (
     <View style={styles.content}>
       <View style={styles.header}>
-        <Text style={styles.title}>Your Progress</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>Your Progress</Text>
+          <Text style={styles.subtitle}>Track your learning journey</Text>
+        </View>
         {onPress && (
           <TouchableOpacity style={styles.viewAllButton} onPress={onPress}>
             <Text style={styles.viewAllText}>View All</Text>
+            <Text style={styles.viewAllArrow}>→</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -105,22 +110,34 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
       {compact ? (
         <View style={styles.compactGrid}>
           <View style={styles.compactStat}>
+            <View style={styles.compactStatIcon}>
+              <Text style={styles.compactStatIconText}>📚</Text>
+            </View>
             <Text style={styles.compactValue}>{statistics.totalWords}</Text>
             <Text style={styles.compactLabel}>Total Words</Text>
           </View>
           <View style={styles.compactStat}>
+            <View style={styles.compactStatIcon}>
+              <Text style={styles.compactStatIconText}>✅</Text>
+            </View>
             <Text style={[styles.compactValue, { color: '#34C759' }]}>
               {statistics.learnedWords}
             </Text>
             <Text style={styles.compactLabel}>Learned</Text>
           </View>
           <View style={styles.compactStat}>
+            <View style={styles.compactStatIcon}>
+              <Text style={styles.compactStatIconText}>🔥</Text>
+            </View>
             <Text style={[styles.compactValue, { color: '#FF9500' }]}>
               {statistics.currentStreak}
             </Text>
             <Text style={styles.compactLabel}>Day Streak</Text>
           </View>
           <View style={styles.compactStat}>
+            <View style={styles.compactStatIcon}>
+              <Text style={styles.compactStatIconText}>⏱️</Text>
+            </View>
             <Text style={[styles.compactValue, { color: '#AF52DE' }]}>
               {formatTime(statistics.totalUsageTime || statistics.totalTimeSpent)}
             </Text>
@@ -174,13 +191,12 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    borderRadius: 20,
-    margin: 20,
+    borderRadius: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowRadius: 20,
+    elevation: 8,
   },
   content: {
     padding: 24,
@@ -188,26 +204,42 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  headerLeft: {
+    flex: 1,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
     color: '#1C1C1E',
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#8E8E93',
+    fontWeight: '500',
   },
   viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 8,
+    borderRadius: 12,
     backgroundColor: '#F2F2F7',
   },
   viewAllText: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#007AFF',
     fontWeight: '600',
-    letterSpacing: 0.2,
+    marginRight: 4,
+  },
+  viewAllArrow: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '600',
   },
   loadingContainer: {
     alignItems: 'center',
@@ -253,6 +285,18 @@ const styles = StyleSheet.create({
   compactStat: {
     alignItems: 'center',
     flex: 1,
+  },
+  compactStatIcon: {
+    width: 32,
+    height: 32,
+    backgroundColor: '#F2F2F7',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  compactStatIconText: {
+    fontSize: 16,
   },
   compactValue: {
     fontSize: 22,

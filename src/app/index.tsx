@@ -4,10 +4,10 @@ import { StackNavigation } from "./navigation";
 
 const Main = () => {
   return (
-    <NavigationProvider>
-      <StatusBar barStyle={'dark-content'} />
-      <StackNavigation />
-    </NavigationProvider>
+      <NavigationProvider>
+        <StatusBar barStyle={'dark-content'} />
+        <StackNavigation />
+      </NavigationProvider>
   )
 };
 

@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ProgressChart, BarChart, LineChart } from 'features/charts';
+import { BarChart } from 'shared/ui';
 import { StatisticsCard } from 'features/statistics';
 import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
@@ -30,20 +30,12 @@ interface ChartData {
 }
 
 const StatisticsScreen = () => {
+
   const [data, setData] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-    usageTrackingService.startSession('Statistics');
-    
-    return () => {
-      usageTrackingService.endCurrentSession();
-    };
-  }, []);
-
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     try {
       setError(null);
       const [stats, dailyUsage, totalUsageTime, todayUsageTime] = await Promise.all([
@@ -64,7 +56,18 @@ const StatisticsScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+
+
+  useEffect(() => {
+    loadData();
+    usageTrackingService.startSession('Statistics');
+    
+    return () => {
+      usageTrackingService.endCurrentSession();
+    };
+  }, [loadData]);
 
   const formatTime = (milliseconds: number): string => {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
@@ -74,28 +77,6 @@ const StatisticsScreen = () => {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
-  };
-
-  const getWeeklyProgressData = () => {
-    if (!data?.dailyUsage) return [];
-    
-    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const today = new Date();
-    const weekData = [];
-    
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      const dateKey = date.toISOString().split('T')[0];
-      const dayUsage = data.dailyUsage.find(usage => usage.date === dateKey);
-      
-      weekData.push({
-        label: weekDays[date.getDay()],
-        value: dayUsage ? Math.round(dayUsage.totalTime / (1000 * 60)) : 0, // Convert to minutes
-      });
-    }
-    
-    return weekData;
   };
 
   const getSessionTimeData = () => {
@@ -129,34 +110,6 @@ const StatisticsScreen = () => {
     }
     
     return weekData;
-  };
-
-  const getLearningTrendData = () => {
-    if (!data?.dailyUsage) return [];
-    
-    // Group by weeks for the last 6 weeks
-    const weeks = [];
-    const today = new Date();
-    
-    for (let i = 5; i >= 0; i--) {
-      const weekStart = new Date(today);
-      weekStart.setDate(weekStart.getDate() - (i * 7));
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-      
-      const weekUsage = data.dailyUsage.filter(usage => {
-        const usageDate = new Date(usage.date);
-        return usageDate >= weekStart && usageDate <= weekEnd;
-      });
-      
-      const totalTime = weekUsage.reduce((sum, day) => sum + day.totalTime, 0);
-      weeks.push({
-        label: `Week ${6 - i}`,
-        value: Math.round(totalTime / (1000 * 60)), // Convert to minutes
-      });
-    }
-    
-    return weeks;
   };
 
   if (loading) {
@@ -222,33 +175,6 @@ const StatisticsScreen = () => {
           </View>
         </View>
 
-        {/* Learning Progress Overview */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Learning Progress</Text>
-          <View style={styles.progressContainer}>
-            <ProgressChart
-              percentage={data.learningRate}
-              size={150}
-              strokeWidth={12}
-              title="Overall Progress"
-              subtitle={`${data.learnedWords} of ${data.totalWords} words`}
-              color={theme.semanticColors.success}
-            />
-          </View>
-        </View>
-
-        {/* Weekly Progress Trend */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Weekly Progress Trend</Text>
-          <LineChart
-            data={getWeeklyProgressData()}
-            title="App Usage This Week"
-            subtitle="Daily usage in minutes"
-            color={theme.semanticColors.brand}
-            height={250}
-          />
-        </View>
-
         {/* Session Time Analysis */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Session Time Analysis</Text>
@@ -258,18 +184,6 @@ const StatisticsScreen = () => {
             subtitle="Minutes spent using the app each day"
             height={250}
             showValues={true}
-          />
-        </View>
-
-        {/* Learning Trend */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Usage Trend</Text>
-          <LineChart
-            data={getLearningTrendData()}
-            title="6-Week Usage Journey"
-            subtitle="App usage per week in minutes"
-            color={theme.colors.purple[500]}
-            height={250}
           />
         </View>
 

@@ -19,6 +19,7 @@ type FilterType = 'all' | 'learned' | 'unlearned';
 
 const WordListScreen = () => {
   const navigation = useNavigation();
+
   const [words, setWords] = useState<Word[]>([]);
   const [filteredWords, setFilteredWords] = useState<Word[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -207,7 +208,10 @@ const WordListScreen = () => {
         >
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Word List</Text>
+        <View style={styles.headerContent}>
+          <Text style={styles.headerTitle}>Word List</Text>
+          <Text style={styles.headerSubtitle}>Manage your vocabulary</Text>
+        </View>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('AddWord' as never)}
@@ -218,13 +222,16 @@ const WordListScreen = () => {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search words or definitions..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor={theme.semanticColors.textSecondary}
-        />
+        <View style={styles.searchInputContainer}>
+          <Text style={styles.searchIcon}>🔍</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search words or definitions..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={theme.semanticColors.textSecondary}
+          />
+        </View>
       </View>
 
       {/* Filter Buttons */}
@@ -284,6 +291,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.semanticColors.borderLight,
   },
+  headerContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#8E8E93',
+    fontWeight: '500',
+    marginTop: 2,
+  },
   backButton: {
     padding: theme.spacing[2],
   },
@@ -311,12 +328,30 @@ const styles = StyleSheet.create({
     padding: theme.spacing[6],
     paddingBottom: theme.spacing[3],
   },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: 12,
+    color: '#8E8E93',
+  },
   searchInput: {
-    backgroundColor: theme.semanticColors.surface,
-    padding: theme.spacing[4],
-    borderRadius: theme.borderRadius.lg,
-    borderWidth: 1,
-    borderColor: theme.semanticColors.borderLight,
+    flex: 1,
+    backgroundColor: 'transparent',
+    padding: 0,
+    borderRadius: 0,
+    borderWidth: 0,
     ...theme.typography.text.body,
     color: theme.semanticColors.textPrimary,
   },

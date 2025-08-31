@@ -17,6 +17,7 @@ import { Word } from 'shared/lib/types';
 
 const LearningScreen = () => {
   const navigation = useNavigation();
+
   const [currentWord, setCurrentWord] = useState<Word | null>(null);
   const [timeSpent, setTimeSpent] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);

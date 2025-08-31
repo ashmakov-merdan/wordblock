@@ -15,6 +15,7 @@ import { theme } from 'shared/theme';
 
 const BlockScreen = () => {
   const navigation = useNavigation();
+
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [blockingSettings, setBlockingSettings] = useState<any>(null);
 

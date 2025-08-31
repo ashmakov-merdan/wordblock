@@ -25,6 +25,7 @@ const BLOCKING_INTERVALS = [
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
+
   const [blockingSettings, setBlockingSettings] = useState<BlockingSettings | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(true);
