@@ -10,7 +10,6 @@ const HomeScreen = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    // Start tracking usage when home screen loads
     usageTrackingService.startSession('Home');
     
     const interval = setInterval(() => {

@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'shared/ui';
-import { StatisticsCard } from 'features/statistics';
 import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
+import { ProgressSummary } from 'widgets';
 
 interface ChartData {
   totalWords: number;
@@ -44,7 +44,7 @@ const StatisticsScreen = () => {
         usageTrackingService.getTotalUsageTime(),
         usageTrackingService.getTodayUsageTime(),
       ]);
-      
+
       setData({
         ...stats,
         totalUsageTime,
@@ -63,7 +63,7 @@ const StatisticsScreen = () => {
   useEffect(() => {
     loadData();
     usageTrackingService.startSession('Statistics');
-    
+
     return () => {
       usageTrackingService.endCurrentSession();
     };
@@ -72,7 +72,7 @@ const StatisticsScreen = () => {
   const formatTime = (milliseconds: number): string => {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -81,7 +81,7 @@ const StatisticsScreen = () => {
 
   const getSessionTimeData = () => {
     if (!data?.dailyUsage) return [];
-    
+
     const colors = [
       theme.semanticColors.brand,
       theme.semanticColors.success,
@@ -91,24 +91,24 @@ const StatisticsScreen = () => {
       theme.semanticColors.brand,
       theme.semanticColors.success,
     ];
-    
+
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
     const weekData = [];
-    
+
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateKey = date.toISOString().split('T')[0];
       const dayUsage = data.dailyUsage.find(usage => usage.date === dateKey);
-      
+
       weekData.push({
         label: weekDays[date.getDay()],
-        value: dayUsage ? Math.round(dayUsage.totalTime / (1000 * 60)) : 0, // Convert to minutes
+        value: dayUsage ? Math.round(dayUsage.totalTime / (1000 * 60)) : 0,
         color: colors[i],
       });
     }
-    
+
     return weekData;
   };
 
@@ -140,38 +140,10 @@ const StatisticsScreen = () => {
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Statistics Cards Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overview</Text>
           <View style={styles.cardsContainer}>
-            <StatisticsCard
-              title="Words Learned"
-              value={`${data.learnedWords}/${data.totalWords}`}
-              subtitle="Total progress"
-              color={theme.semanticColors.success}
-              size="medium"
-            />
-            <StatisticsCard
-              title="Current Streak"
-              value={data.currentStreak}
-              subtitle="days"
-              color={theme.semanticColors.brand}
-              size="medium"
-            />
-            <StatisticsCard
-              title="Total Time"
-              value={formatTime(data.totalUsageTime || data.totalTimeSpent)}
-              subtitle="total app usage"
-              color={theme.colors.purple[500]}
-              size="medium"
-            />
-            <StatisticsCard
-              title="Study Sessions"
-              value={data.totalSessions}
-              subtitle="completed"
-              color={theme.semanticColors.warning}
-              size="medium"
-            />
+            <ProgressSummary compact />
           </View>
         </View>
 
@@ -221,20 +193,20 @@ const StatisticsScreen = () => {
             <View style={styles.insightCard}>
               <Text style={styles.insightTitle}>Learning Efficiency</Text>
               <Text style={styles.insightValue}>
-                {data.learningRate >= 80 
+                {data.learningRate >= 80
                   ? 'Excellent'
                   : data.learningRate >= 60
-                  ? 'Good'
-                  : 'Improving'
+                    ? 'Good'
+                    : 'Improving'
                 }
               </Text>
               <Text style={styles.insightDescription}>
-                Your learning efficiency is {data.learningRate.toFixed(1)}%. 
-                {data.learningRate >= 80 
+                Your learning efficiency is {data.learningRate.toFixed(1)}%.
+                {data.learningRate >= 80
                   ? ' Keep up the excellent work!'
                   : data.learningRate >= 60
-                  ? ' Consistent practice will improve this further.'
-                  : ' Regular study sessions will help improve your success rate.'
+                    ? ' Consistent practice will improve this further.'
+                    : ' Regular study sessions will help improve your success rate.'
                 }
               </Text>
             </View>
@@ -245,20 +217,20 @@ const StatisticsScreen = () => {
                 {data.currentStreak >= 7
                   ? 'Outstanding'
                   : data.currentStreak >= 3
-                  ? 'Good'
-                  : 'Starting'
+                    ? 'Good'
+                    : 'Starting'
                 }
               </Text>
               <Text style={styles.insightDescription}>
-                {data.currentStreak > 0 
+                {data.currentStreak > 0
                   ? `You've maintained a ${data.currentStreak}-day streak. `
                   : 'Start your learning journey today! '
                 }
                 {data.currentStreak >= 7
                   ? 'This level of consistency will lead to great results.'
                   : data.currentStreak >= 3
-                  ? 'Try to maintain this momentum for better results.'
-                  : 'Building daily habits is key to long-term success.'
+                    ? 'Try to maintain this momentum for better results.'
+                    : 'Building daily habits is key to long-term success.'
                 }
               </Text>
             </View>

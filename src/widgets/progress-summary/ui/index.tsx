@@ -22,7 +22,6 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
   useEffect(() => {
     loadStatistics();
     
-    // Refresh statistics every 30 seconds to keep time usage updated
     const interval = setInterval(() => {
       loadStatistics();
     }, 30000);
@@ -30,7 +29,6 @@ const ProgressSummary: React.FC<ProgressSummaryProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Refresh statistics when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
       loadStatistics();
