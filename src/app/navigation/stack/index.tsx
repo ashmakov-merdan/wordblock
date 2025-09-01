@@ -8,17 +8,27 @@ const StackNavigation = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
         header: (props) => <Header {...props} />
       }}>
-      <Stack.Screen name={"Home"} component={HomeScreen} />
-      <Stack.Screen name={"Statistics"} component={StatisticsScreen} options={{
-        title: 'Statistics',
-        headerShown: true,
+      <Stack.Screen name={"Home"} component={HomeScreen} options={{
+        headerShown: false,
       }} />
+      <Stack.Screen
+        name={"Statistics"}
+        component={StatisticsScreen}
+        options={{
+          title: 'Statistics'
+        }} />
       <Stack.Screen name={"Block"} component={BlockScreen} />
       <Stack.Screen name={"Learning"} component={LearningScreen} />
-      <Stack.Screen name={"Settings"} component={SettingsScreen} />
+      <Stack.Screen
+        name={"Settings"}
+        component={SettingsScreen}
+        options={{
+          title: 'Settings'
+        }}
+      />
       <Stack.Screen name={"WordList"} component={WordListScreen} />
       <Stack.Screen name={"AddWord"} component={AddWordScreen} />
     </Stack.Navigator>

@@ -9,13 +9,12 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
 import { blockingService } from 'shared/lib/services/blocking-service';
 import { theme } from 'shared/theme';
 import { BlockingSettings, AppSettings } from 'shared/lib/types';
-import { CaretLeftIcon, ShieldCheckIcon, ClockIcon } from 'phosphor-react-native';
+import { ShieldCheckIcon, ClockIcon } from 'phosphor-react-native';
 
 const BLOCKING_INTERVALS = [
   { label: '15 minutes', value: 15 },
@@ -26,8 +25,6 @@ const BLOCKING_INTERVALS = [
 ];
 
 const SettingsScreen = () => {
-  const navigation = useNavigation();
-
   const [blockingSettings, setBlockingSettings] = useState<BlockingSettings | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -187,18 +184,7 @@ const SettingsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <CaretLeftIcon size={20} color="#8E8E93" />
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={styles.container}>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Blocking Settings */}
@@ -324,41 +310,14 @@ const SettingsScreen = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.semanticColors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing[6],
-    paddingVertical: theme.spacing[4],
-    borderBottomWidth: 1,
-    borderBottomColor: theme.semanticColors.borderLight,
-  },
-  backButton: {
-    padding: theme.spacing[2],
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing[2],
-  },
-  backButtonText: {
-    ...theme.typography.text.body,
-    color: theme.semanticColors.brand,
-    fontWeight: theme.typography.fontWeight.medium,
-  },
-  headerTitle: {
-    ...theme.typography.text.h3,
-    color: theme.semanticColors.textPrimary,
-  },
-  headerSpacer: {
-    width: 60,
+    backgroundColor: 'white',
   },
   content: {
     flex: 1,
