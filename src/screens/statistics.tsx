@@ -11,8 +11,8 @@ import { BarChart } from 'shared/ui';
 import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
 import { theme } from 'shared/theme';
-import { ProgressSummary } from 'widgets';
 import { ChartFilters, MetricsCard } from 'features/statistics';
+import { SummaryList } from 'features/summary';
 
 interface ChartData {
   totalWords: number;
@@ -202,17 +202,11 @@ const StatisticsScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Statistics</Text>
-      </View>
-
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overview</Text>
-          <View style={styles.cardsContainer}>
-            <ProgressSummary compact />
-          </View>
+          <SummaryList />
         </View>
 
         {/* Usage Analytics */}
@@ -257,28 +251,14 @@ const StatisticsScreen = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.semanticColors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: theme.spacing[6],
-    paddingVertical: theme.spacing[4],
-    backgroundColor: theme.semanticColors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.semanticColors.borderLight,
-  },
-  title: {
-    ...theme.typography.text.h3,
-    color: theme.semanticColors.textPrimary,
+    backgroundColor: 'white',
   },
   scrollView: {
     flex: 1,
