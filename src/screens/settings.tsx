@@ -6,14 +6,16 @@ import {
   TouchableOpacity,
   ScrollView,
   Switch,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { storageService } from 'shared/lib/storage';
 import { usageTrackingService } from 'shared/lib/services';
+import { blockingService } from 'shared/lib/services/blocking-service';
 import { theme } from 'shared/theme';
 import { BlockingSettings, AppSettings } from 'shared/lib/types';
-import { CaretLeftIcon } from 'phosphor-react-native';
+import { CaretLeftIcon, ShieldCheckIcon, ClockIcon } from 'phosphor-react-native';
 
 const BLOCKING_INTERVALS = [
   { label: '15 minutes', value: 15 },
@@ -29,6 +31,8 @@ const SettingsScreen = () => {
   const [blockingSettings, setBlockingSettings] = useState<BlockingSettings | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMonitoringActive, setIsMonitoringActive] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -47,6 +51,15 @@ const SettingsScreen = () => {
       ]);
       setBlockingSettings(blocking);
       setAppSettings(app);
+
+      // Check monitoring status and permissions
+      const [monitoringActive, permissionStatus] = await Promise.all([
+        blockingService.isBackgroundMonitoringActive(),
+        blockingService.checkPermissions(),
+      ]);
+      
+      setIsMonitoringActive(monitoringActive);
+      setHasPermission(permissionStatus);
     } catch (error) {
       console.error('Failed to load settings:', error);
     } finally {
@@ -60,6 +73,12 @@ const SettingsScreen = () => {
         intervalMinutes: intervalMinutes as any,
       });
       setBlockingSettings(updated);
+
+      // Restart monitoring with new interval if active
+      if (isMonitoringActive) {
+        await blockingService.stopBackgroundMonitoring();
+        await blockingService.startBackgroundMonitoring();
+      }
     } catch (error) {
       console.error('Failed to update blocking interval:', error);
     }
@@ -71,8 +90,45 @@ const SettingsScreen = () => {
         isEnabled: enabled,
       });
       setBlockingSettings(updated);
+
+      if (enabled) {
+        if (!hasPermission) {
+          Alert.alert(
+            'Permission Required',
+            'Usage stats permission is required for screen time blocking. Please grant permission in the next screen.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { 
+                text: 'Grant Permission', 
+                onPress: () => {
+                  // This will open the usage access settings
+                  import('native/android/usage-stats-manager').then(({ openUsageAccessSettings }) => {
+                    openUsageAccessSettings();
+                  });
+                }
+              },
+            ]
+          );
+          return;
+        }
+
+        const success = await blockingService.startBackgroundMonitoring();
+        if (success) {
+          setIsMonitoringActive(true);
+          Alert.alert('Success', 'Background monitoring started successfully!');
+        } else {
+          Alert.alert('Error', 'Failed to start background monitoring. Please check permissions.');
+        }
+      } else {
+        const success = await blockingService.stopBackgroundMonitoring();
+        if (success) {
+          setIsMonitoringActive(false);
+          Alert.alert('Success', 'Background monitoring stopped successfully!');
+        }
+      }
     } catch (error) {
       console.error('Failed to toggle blocking:', error);
+      Alert.alert('Error', 'Failed to update blocking settings');
     }
   };
 
@@ -98,7 +154,27 @@ const SettingsScreen = () => {
     }
   };
 
+  const checkBlockingStatus = async () => {
+    try {
+      const status = await blockingService.shouldBlock();
+      Alert.alert(
+        'Current Blocking Status',
+        `Should Block: ${status.shouldBlock ? 'Yes' : 'No'}\n` +
+        `Usage: ${Math.round(status.usagePercentage)}%\n` +
+        `Time Used: ${Math.round(status.totalUsageTime / (1000 * 60))} minutes\n` +
+        `Remaining: ${Math.round(status.remainingMinutes)} minutes`
+      );
+    } catch (error) {
+      console.error('Failed to check blocking status:', error);
+      Alert.alert('Error', 'Failed to check blocking status');
+    }
+  };
 
+  const requestPermissions = () => {
+    import('native/android/usage-stats-manager').then(({ openUsageAccessSettings }) => {
+      openUsageAccessSettings();
+    });
+  };
 
   if (loading) {
     return (
@@ -135,6 +211,11 @@ const SettingsScreen = () => {
               <Text style={styles.settingDescription}>
                 Automatically block device access after time limit
               </Text>
+              {!hasPermission && (
+                <Text style={styles.permissionWarning}>
+                  ⚠️ Usage stats permission required
+                </Text>
+              )}
             </View>
             <Switch
               value={blockingSettings?.isEnabled || false}
@@ -142,6 +223,32 @@ const SettingsScreen = () => {
               trackColor={{ false: theme.semanticColors.borderLight, true: theme.semanticColors.brand }}
               thumbColor="white"
             />
+          </View>
+
+          {!hasPermission && (
+            <TouchableOpacity
+              style={styles.permissionButton}
+              onPress={requestPermissions}
+            >
+              <ShieldCheckIcon size={20} color="white" />
+              <Text style={styles.permissionButtonText}>Grant Usage Permission</Text>
+            </TouchableOpacity>
+          )}
+
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Background Monitoring</Text>
+              <Text style={styles.settingDescription}>
+                Status: {isMonitoringActive ? 'Active' : 'Inactive'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.statusButton}
+              onPress={checkBlockingStatus}
+            >
+              <ClockIcon size={20} color={theme.semanticColors.brand} />
+              <Text style={styles.statusButtonText}>Check Status</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.settingItem}>
@@ -200,8 +307,6 @@ const SettingsScreen = () => {
             </View>
           </View>
         </View>
-
-
 
         {/* Statistics */}
         <View style={styles.section}>
@@ -294,6 +399,41 @@ const styles = StyleSheet.create({
     ...theme.typography.text.bodySmall,
     color: theme.semanticColors.textSecondary,
   },
+  permissionWarning: {
+    ...theme.typography.text.caption,
+    color: theme.semanticColors.error,
+    marginTop: theme.spacing[1],
+  },
+  permissionButton: {
+    backgroundColor: theme.semanticColors.error,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing[3],
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing[4],
+    gap: theme.spacing[2],
+  },
+  permissionButtonText: {
+    ...theme.typography.text.body,
+    color: 'white',
+    fontWeight: theme.typography.fontWeight.medium,
+  },
+  statusButton: {
+    backgroundColor: theme.semanticColors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: theme.spacing[2],
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.semanticColors.borderLight,
+    gap: theme.spacing[2],
+  },
+  statusButtonText: {
+    ...theme.typography.text.bodySmall,
+    color: theme.semanticColors.brand,
+    fontWeight: theme.typography.fontWeight.medium,
+  },
   intervalOptions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -342,16 +482,6 @@ const styles = StyleSheet.create({
     ...theme.typography.text.bodySmall,
     color: theme.semanticColors.textSecondary,
     textAlign: 'center',
-  },
-
-  infoContainer: {
-    alignItems: 'center',
-  },
-  infoText: {
-    ...theme.typography.text.bodySmall,
-    color: theme.semanticColors.textSecondary,
-    textAlign: 'center',
-    marginBottom: theme.spacing[1],
   },
 });
 

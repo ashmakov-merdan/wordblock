@@ -37,4 +37,8 @@ class MainApplication : Application(), ReactApplication {
     super.onCreate()
     loadReactNative(this)
   }
+
+  // Expose ReactInstanceManager for services to use
+  val reactInstanceManager
+    get() = reactNativeHost.reactInstanceManager
 }

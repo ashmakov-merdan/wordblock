@@ -1,346 +1,293 @@
-import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  ViewStyle,
-  TextStyle,
-  TouchableOpacityProps,
-} from 'react-native';
-import { colors, semanticColors } from '../../theme/colors';
+import { IconWeight, Icon as PhosphorIcon } from "phosphor-react-native";
+import { FC, useCallback } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, ViewStyle, TextStyle } from "react-native";
+import { colors } from "../../theme/colors";
 
-export type ButtonVariant = 
-  | 'primary' 
-  | 'secondary' 
-  | 'outline' 
-  | 'ghost' 
-  | 'danger' 
-  | 'success' 
-  | 'warning';
+// Button variants
+type ButtonVariant = 'solid' | 'outlined' | 'ghost' | 'text';
 
-export type ButtonSize = 'small' | 'medium' | 'large';
+// Button colors
+type ButtonColor = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'neutral';
 
-export interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
-  // Content
-  title: string;
+// Button shapes
+type ButtonShape = 'rounded' | 'pill' | 'square';
+
+// Button sizes
+type ButtonSize = 'sm' | 'md' | 'lg';
+
+interface ButtonProps {
+  title?: string;
   subtitle?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  
-  // Styling
+  icon?: PhosphorIcon;
+  iconSize?: number;
+  iconWeight?: IconWeight;
+  onPress?: () => void;
+  isIconOnly?: boolean;
   variant?: ButtonVariant;
+  color?: ButtonColor;
+  shape?: ButtonShape;
   size?: ButtonSize;
-  fullWidth?: boolean;
   disabled?: boolean;
   loading?: boolean;
-  
-  // Custom styling
+  fullWidth?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
-  containerStyle?: ViewStyle;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Button: FC<ButtonProps> = ({
   title,
   subtitle,
-  leftIcon,
-  rightIcon,
-  variant = 'primary',
-  size = 'medium',
-  fullWidth = false,
+  icon,
+  iconSize,
+  iconWeight = 'regular',
+  onPress,
+  isIconOnly,
+  variant = 'solid',
+  color = 'primary',
+  shape = 'rounded',
+  size = 'md',
   disabled = false,
   loading = false,
+  fullWidth = false,
   style,
-  textStyle,
-  containerStyle,
-  onPress,
-  ...restProps
+  textStyle
 }) => {
-  const isDisabled = disabled || loading;
-  
-  const buttonStyles = [
-    styles.base,
-    styles[size],
-    styles[variant],
-    fullWidth && styles.fullWidth,
-    isDisabled && styles.disabled,
-    style,
-  ];
+  const Icon = icon;
 
-  const textStyles = [
-    styles.text,
-    styles[`${size}Text`],
-    styles[`${variant}Text`],
-    isDisabled && styles.disabledText,
-    textStyle,
-  ];
+  // Get dynamic icon size based on button size
+  const getIconSize = () => {
+    if (iconSize) return iconSize;
+    switch (size) {
+      case 'sm': return 16;
+      case 'lg': return 28;
+      default: return 24;
+    }
+  };
 
-  const subtitleStyles = [
-    styles.subtitle,
-    styles[`${size}Subtitle`],
-    styles[`${variant}Subtitle`],
-    isDisabled && styles.disabledText,
-  ];
+  // Get button styles based on variant, color, shape, and size
+  const getButtonStyles = (): ViewStyle => {
+    const baseStyles: ViewStyle = {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: size === 'sm' ? 8 : 16,
+      borderWidth: variant === 'outlined' ? 1 : 0,
+      paddingHorizontal: getPadding(),
+      paddingVertical: getPadding(),
+      minHeight: getMinHeight(),
+      opacity: disabled ? 0.5 : 1,
+    };
 
-  const handlePress = isDisabled ? undefined : onPress;
+    // Add shape styles
+    switch (shape) {
+      case 'pill':
+        baseStyles.borderRadius = 50;
+        break;
+      case 'square':
+        baseStyles.borderRadius = 4;
+        break;
+      default: // rounded
+        baseStyles.borderRadius = 12;
+    }
+
+    // Add width styles
+    if (fullWidth) {
+      baseStyles.width = '100%';
+    }
+
+    // Add variant and color styles
+    const variantStyles = getVariantStyles(variant, color);
+
+    return { ...baseStyles, ...variantStyles };
+  };
+
+  // Get text styles based on variant, color, and size
+  const getTextStyles = (): TextStyle => {
+    const baseStyles: TextStyle = {
+      fontWeight: '600',
+      textAlign: 'center',
+    };
+
+    // Add size styles
+    switch (size) {
+      case 'sm':
+        baseStyles.fontSize = 14;
+        break;
+      case 'lg':
+        baseStyles.fontSize = 20;
+        break;
+      default:
+        baseStyles.fontSize = 18;
+    }
+
+    // Add variant and color styles
+    const variantStyles = getTextVariantStyles(variant, color);
+
+    return { ...baseStyles, ...variantStyles };
+  };
+
+  // Get subtitle styles
+  const getSubtitleStyles = (): TextStyle => {
+    const baseStyles: TextStyle = {
+      fontWeight: '500',
+      textAlign: 'center',
+    };
+
+    switch (size) {
+      case 'sm':
+        baseStyles.fontSize = 12;
+        break;
+      case 'lg':
+        baseStyles.fontSize = 16;
+        break;
+      default:
+        baseStyles.fontSize = 14;
+    }
+
+    const variantStyles = getTextVariantStyles(variant, color);
+    variantStyles.opacity = 0.8;
+
+    return { ...baseStyles, ...variantStyles };
+  };
+
+  const getPadding = useCallback(() => {
+    switch (size) {
+      case 'sm': return 12;
+      case 'lg': return 24;
+      default: return 16;
+    }
+  }, [size])
+
+  const getMinHeight = () => {
+    switch (size) {
+      case 'sm': return 36;
+      case 'lg': return 56;
+      default: return 48;
+    }
+  };
+
+  // Get variant styles
+  const getVariantStyles = (variant: ButtonVariant, color: ButtonColor): ViewStyle => {
+    const colorMap = {
+      primary: colors.primary,
+      secondary: colors.neutral,
+      success: colors.success,
+      warning: colors.warning,
+      error: colors.error,
+      neutral: colors.gray,
+    };
+
+    const selectedColor = colorMap[color];
+
+    switch (variant) {
+      case 'solid':
+        return {
+          backgroundColor: selectedColor[500],
+          borderColor: selectedColor[500],
+        };
+      case 'outlined':
+        // Use darker border for neutral color for better contrast
+        if (color === 'neutral') {
+          return {
+            backgroundColor: 'transparent',
+            borderColor: selectedColor[200],
+          };
+        }
+        return {
+          backgroundColor: 'transparent',
+          borderColor: selectedColor[500],
+        };
+      case 'ghost':
+        return {
+          backgroundColor: selectedColor[50],
+          borderColor: 'transparent',
+        };
+      case 'text':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+        };
+      default:
+        return {};
+    }
+  };
+
+  // Get text variant styles
+  const getTextVariantStyles = (variant: ButtonVariant, color: ButtonColor): TextStyle => {
+    const colorMap = {
+      primary: colors.primary,
+      secondary: colors.neutral,
+      success: colors.success,
+      warning: colors.warning,
+      error: colors.error,
+      neutral: colors.gray,
+    };
+
+    const selectedColor = colorMap[color];
+
+    switch (variant) {
+      case 'solid':
+        return {
+          color: colors.text.inverse,
+        };
+      case 'outlined':
+      case 'ghost':
+      case 'text':
+        // Use darker shades for better contrast, especially for neutral colors
+        if (color === 'neutral') {
+          return {
+            color: selectedColor[700], // Use darker gray for better contrast
+          };
+        }
+        return {
+          color: selectedColor[500],
+        };
+      default:
+        return {
+          color: colors.text.primary,
+        };
+    }
+  };
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      <TouchableOpacity
-        style={buttonStyles}
-        onPress={handlePress}
-        activeOpacity={0.8}
-        disabled={isDisabled}
-        {...restProps}
-      >
-        {loading ? (
-          <ActivityIndicator 
-            size="small" 
-            color={getLoadingColor(variant)} 
-          />
-        ) : (
-          <View style={styles.content}>
-            {leftIcon && (
-              <View style={styles.leftIcon}>
-                {leftIcon}
-              </View>
-            )}
-            
-            <View style={styles.textContainer}>
-              <Text style={textStyles}>{title}</Text>
-              {subtitle && (
-                <Text style={subtitleStyles}>{subtitle}</Text>
-              )}
-            </View>
-            
-            {rightIcon && (
-              <View style={styles.rightIcon}>
-                {rightIcon}
-              </View>
-            )}
-          </View>
-        )}
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity
+      style={[getButtonStyles(), style]}
+      onPress={onPress}
+      activeOpacity={0.9}
+      disabled={disabled || loading}
+    >
+      {Icon && (
+        <Icon
+          size={getIconSize()}
+          weight={iconWeight}
+          color={getTextVariantStyles(variant, color).color as string}
+        />
+      )}
+      {!isIconOnly && (
+        <View style={styles.text}>
+          {title && (
+            <Text style={[getTextStyles(), textStyle]}>
+              {loading ? 'Loading...' : title}
+            </Text>
+          )}
+          {subtitle && (
+            <Text style={getSubtitleStyles()}>
+              {subtitle}
+            </Text>
+          )}
+        </View>
+      )}
+    </TouchableOpacity>
   );
 };
 
-const getLoadingColor = (variant: ButtonVariant): string => {
-  switch (variant) {
-    case 'primary':
-      return semanticColors.textInverse;
-    case 'secondary':
-    case 'outline':
-    case 'ghost':
-      return semanticColors.textPrimary;
-    case 'danger':
-      return semanticColors.textInverse;
-    case 'success':
-      return semanticColors.textInverse;
-    case 'warning':
-      return semanticColors.textInverse;
-    default:
-      return semanticColors.textInverse;
-  }
-};
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  base: {
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    minHeight: 44,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  textContainer: {
-    alignItems: 'center',
-  },
-  leftIcon: {
-    marginRight: 8,
-  },
-  rightIcon: {
-    marginLeft: 8,
-  },
   text: {
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 12,
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  fullWidth: {
-    width: '100%',
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  disabledText: {
-    opacity: 0.7,
-  },
-
-  // Size variants
-  small: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    minHeight: 36,
-  },
-  medium: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    minHeight: 44,
-  },
-  large: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    minHeight: 52,
-  },
-
-  // Size text variants
-  smallText: {
-    fontSize: 14,
-  },
-  mediumText: {
-    fontSize: 16,
-  },
-  largeText: {
-    fontSize: 18,
-  },
-
-  // Size subtitle variants
-  smallSubtitle: {
-    fontSize: 10,
-  },
-  mediumSubtitle: {
-    fontSize: 12,
-  },
-  largeSubtitle: {
-    fontSize: 14,
-  },
-
-  // Primary variant
-  primary: {
-    backgroundColor: semanticColors.brand,
-    shadowColor: semanticColors.shadowPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  primaryText: {
-    color: semanticColors.textInverse,
-  },
-  primarySubtitle: {
-    color: semanticColors.textInverse,
-    opacity: 0.8,
-  },
-
-  // Secondary variant
-  secondary: {
-    backgroundColor: semanticColors.surface,
-    borderWidth: 1,
-    borderColor: semanticColors.borderLight,
-    shadowColor: semanticColors.shadowLight,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  secondaryText: {
-    color: semanticColors.textPrimary,
-  },
-  secondarySubtitle: {
-    color: semanticColors.textSecondary,
-  },
-
-  // Outline variant
-  outline: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: semanticColors.brand,
-  },
-  outlineText: {
-    color: semanticColors.brand,
-  },
-  outlineSubtitle: {
-    color: semanticColors.textSecondary,
-  },
-
-  // Ghost variant
-  ghost: {
-    backgroundColor: 'transparent',
-  },
-  ghostText: {
-    color: semanticColors.brand,
-  },
-  ghostSubtitle: {
-    color: semanticColors.textSecondary,
-  },
-
-  // Danger variant
-  danger: {
-    backgroundColor: semanticColors.error,
-    shadowColor: colors.error[500],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  dangerText: {
-    color: semanticColors.textInverse,
-  },
-  dangerSubtitle: {
-    color: semanticColors.textInverse,
-    opacity: 0.8,
-  },
-
-  // Success variant
-  success: {
-    backgroundColor: semanticColors.success,
-    shadowColor: colors.success[500],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  successText: {
-    color: semanticColors.textInverse,
-  },
-  successSubtitle: {
-    color: semanticColors.textInverse,
-    opacity: 0.8,
-  },
-
-  // Warning variant
-  warning: {
-    backgroundColor: semanticColors.warning,
-    shadowColor: colors.warning[500],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  warningText: {
-    color: semanticColors.textInverse,
-  },
-  warningSubtitle: {
-    color: semanticColors.textInverse,
-    opacity: 0.8,
+    alignItems: 'center',
   },
 });
 
 Button.displayName = 'Button';
 
 export default Button;
+export type { ButtonProps, ButtonVariant, ButtonColor, ButtonShape, ButtonSize };

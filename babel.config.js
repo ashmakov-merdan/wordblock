@@ -19,6 +19,7 @@ module.exports = {
         alias: {
           '*': './src/*',
           'app/*': './src/app/*',
+          'entities/*': './src/entities/*',
           'shared/*': './src/shared/*',
           'screens/*': './src/screens/*',
           'native/*': './src/native/*'

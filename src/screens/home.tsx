@@ -1,115 +1,96 @@
-import { Text, View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { ProgressSummary } from "widgets";
 import { usageTrackingService } from "shared/lib/services";
+import { blockingService } from "shared/lib/services/blocking-service";
 import { Button } from "shared/ui";
-import { BookOpenIcon, ChartBarIcon, GearIcon, ArrowRightIcon } from "phosphor-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
+import { SummaryList } from "features/summary";
+import logo from 'shared/assets/images/logo.png';
+import { GearSixIcon } from "phosphor-react-native";
+import { HeroDescription, WordBlocks } from "features/hero";
+import { theme } from "shared/theme";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [_refreshKey, setRefreshKey] = useState(0);
+  const [_isMonitoringActive, setIsMonitoringActive] = useState(false);
 
-  useEffect(() => {
-    usageTrackingService.startSession('Home');
-    
-    const interval = setInterval(() => {
-      setRefreshKey(prev => prev + 1);
-    }, 30000);
-    
-    return () => {
-      // End session when component unmounts
-      usageTrackingService.endCurrentSession();
-      clearInterval(interval);
-    };
-  }, []);
-
-  // Refresh when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
       usageTrackingService.startSession('Home');
       setRefreshKey(prev => prev + 1);
+      checkMonitoringStatus();
     }, [])
   );
 
-  const handleViewStatistics = () => {
-    usageTrackingService.startSession('Statistics');
-    navigation.navigate('Statistics' as never);
+  const checkMonitoringStatus = async () => {
+    try {
+      const isActive = await blockingService.isBackgroundMonitoringActive();
+      setIsMonitoringActive(isActive);
+    } catch (error) {
+      console.error('Failed to check monitoring status:', error);
+    }
   };
 
   const handleStartLearning = () => {
-    usageTrackingService.startSession('WordList');
-    navigation.navigate('WordList' as never);
+    navigation.navigate('Learning' as never);
   };
 
-  const handleSettings = () => {
-    usageTrackingService.startSession('Settings');
+  const handleViewStatistics = useCallback(() => {
+    navigation.navigate('Statistics' as never);
+  }, [navigation]);
+
+  const handleSettings = useCallback(() => {
     navigation.navigate('Settings' as never);
-  };
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header Section */}
+
         <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>WordBlock</Text>
-            <Text style={styles.subtitle}>Learn words while managing screen time</Text>
-            <View style={styles.headerDecoration} />
-          </View>
-        </View>
-        
-        {/* Progress Summary Card */}
-        <View style={styles.progressSection}>
-          <ProgressSummary 
-            key={refreshKey}
-            onPress={handleViewStatistics}
-            compact={true}
+          <Image
+            source={logo}
+            alt={'logo'}
+            style={styles.logo}
           />
-        </View>
-        
-        {/* Main Actions Section */}
-        <View style={styles.actionsSection}>
-          <Text style={styles.sectionTitle}>Get Started</Text>
-          
           <Button
-            title="Start Learning"
-            subtitle="Browse and learn new words"
-            leftIcon={<BookOpenIcon size={24} color="#FFFFFF" />}
-            rightIcon={<ArrowRightIcon size={24} color="#FFFFFF" />}
-            onPress={handleStartLearning}
-            style={styles.primaryButton}
+            icon={GearSixIcon}
+            isIconOnly
+            color={'neutral'}
+            variant={'outlined'}
+            onPress={handleSettings}
           />
+        </View>
 
-          <View style={styles.secondaryActionsGrid}>
+        <View style={styles.hero}>
+          <HeroDescription />
+          <WordBlocks key={_refreshKey} />
+        </View>
+
+        <View style={styles.content}>
+          <SummaryList />
+          <View style={styles.statistics}>
             <Button
-              title="Statistics"
-              leftIcon={<ChartBarIcon size={24} color="#007AFF" />}
-              variant="secondary"
+              title="View statistics"
+              size={'sm'}
               onPress={handleViewStatistics}
-              style={styles.secondaryButton}
+              variant={'outlined'}
+              color={'neutral'}
             />
+          </View>
 
+          <View>
             <Button
-              title="Settings"
-              leftIcon={<GearIcon size={24} color="#007AFF" />}
-              variant="secondary"
-              onPress={handleSettings}
-              style={styles.secondaryButton}
+              title="Start Learning"
+              subtitle="Browse and learn new words"
+              onPress={handleStartLearning}
+              size={'sm'}
             />
           </View>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.footerContent}>
-            <Text style={styles.footerText}>
-              Track your progress and build better screen time habits
-            </Text>
-            <View style={styles.footerDecoration} />
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -122,182 +103,33 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingHorizontal: 16,
     backgroundColor: '#F8F9FA',
   },
+  logo: {
+    width: 160,
+    height: 33,
+  },
   header: {
-    paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 32,
-  },
-  headerContent: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: '800',
-    marginBottom: 8,
-    color: '#1C1C1E',
-    letterSpacing: -0.8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 16,
-  },
-  headerDecoration: {
-    width: 60,
-    height: 4,
-    backgroundColor: '#007AFF',
-    borderRadius: 2,
-    marginTop: 8,
-  },
-  progressSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  actionsSection: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1C1C1E',
-    marginBottom: 20,
-    letterSpacing: -0.3,
-  },
-  primaryButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 20,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  primaryButtonContent: {
     flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
-  primaryButtonIcon: {
-    width: 48,
-    height: 48,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
+  hero: {
+    minHeight: 300,
   },
-  primaryButtonIconText: {
-    fontSize: 24,
+  content: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+    paddingTop: 24,
+    gap: 20
   },
-  primaryButtonTextContainer: {
-    flex: 1,
-  },
-  primaryButtonText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: 'white',
-    marginBottom: 4,
-    letterSpacing: -0.3,
-  },
-  primaryButtonSubtext: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    lineHeight: 18,
-  },
-  primaryButtonArrow: {
-    width: 32,
-    height: 32,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  arrowText: {
-    fontSize: 18,
-    color: 'white',
-    fontWeight: '600',
-  },
-  secondaryActionsGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  secondaryButton: {
-    flex: 1,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  secondaryButtonIcon: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#F2F2F7',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  secondaryButtonIconText: {
-    fontSize: 20,
-  },
-  secondaryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1C1E',
-    letterSpacing: -0.2,
-  },
-  quickActionsSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  testButton: {
-    backgroundColor: '#FF9500',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#FF9500',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  testButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
-    letterSpacing: -0.2,
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  footerContent: {
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#8E8E93',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  footerDecoration: {
-    width: 40,
-    height: 3,
-    backgroundColor: '#E5E5EA',
-    borderRadius: 1.5,
-  },
+  statistics: {
+    maxWidth: 200,
+    width: '100%',
+    margin: 'auto',
+  }
 });
 
 export default HomeScreen;

@@ -1,3 +1,5 @@
+import { WORD_DIFFICULTY } from "entities/words";
+
 export interface Word {
   id: string;
   word: string;
@@ -6,7 +8,7 @@ export interface Word {
   createdAt: number;
   lastReviewed?: number;
   reviewCount: number;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: WORD_DIFFICULTY;
 }
 
 export interface UserProgress {

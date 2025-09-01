@@ -58,7 +58,7 @@ const StatisticsScreen = () => {
         totalUsageTime,
         todayUsageTime,
       });
-      
+
       setData({
         ...stats,
         totalUsageTime,
@@ -98,7 +98,7 @@ const StatisticsScreen = () => {
         console.error('Error checking usage sessions:', error);
       }
     };
-    
+
     checkUsageSessions();
   }, []);
 
@@ -106,7 +106,7 @@ const StatisticsScreen = () => {
     if (!data) return [];
 
     console.log('Current Chart Filter:', chartFilter);
-    
+
     switch (chartFilter) {
       case 'daily':
         return getDailyData();
@@ -121,10 +121,10 @@ const StatisticsScreen = () => {
 
   const getDailyData = () => {
     if (!data?.dailyUsage) return [];
-    
+
     const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
-    const weekData: Array<{label: string; value: number; color: string}> = [];
+    const weekData: Array<{ label: string; value: number; color: string }> = [];
 
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
@@ -145,11 +145,11 @@ const StatisticsScreen = () => {
   const getWeeklyData = () => {
     if (!data?.weeklyUsage) return [];
 
-    const weekData: Array<{label: string; value: number; color: string}> = [];
+    const weekData: Array<{ label: string; value: number; color: string }> = [];
     const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 
     const recentWeeks = data.weeklyUsage.slice(-4);
-    
+
     recentWeeks.forEach((week, index) => {
       weekData.push({
         label: weekLabels[index] || `Week ${index + 1}`,
@@ -165,10 +165,10 @@ const StatisticsScreen = () => {
   const getMonthlyData = () => {
     if (!data?.monthlyUsage) return [];
 
-    const monthData: Array<{label: string; value: number; color: string}> = [];
+    const monthData: Array<{ label: string; value: number; color: string }> = [];
 
     const recentMonths = data.monthlyUsage.slice(-6);
-    
+
     recentMonths.forEach((month) => {
       const monthDate = new Date(month.date);
       monthData.push({
@@ -254,57 +254,6 @@ const StatisticsScreen = () => {
               label="Blocks Triggered"
               unit="screen time managed"
             />
-          </View>
-        </View>
-
-        {/* Insights */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Insights</Text>
-          <View style={styles.insightsContainer}>
-            <View style={styles.insightCard}>
-              <Text style={styles.insightTitle}>Learning Efficiency</Text>
-              <Text style={styles.insightValue}>
-                {data.learningRate >= 80
-                  ? 'Excellent'
-                  : data.learningRate >= 60
-                    ? 'Good'
-                    : 'Improving'
-                }
-              </Text>
-              <Text style={styles.insightDescription}>
-                Your learning efficiency is {data.learningRate.toFixed(1)}%.
-                {data.learningRate >= 80
-                  ? ' Keep up the excellent work!'
-                  : data.learningRate >= 60
-                    ? ' Consistent practice will improve this further.'
-                    : ' Regular study sessions will help improve your success rate.'
-                }
-              </Text>
-            </View>
-
-            <View style={styles.insightCard}>
-              <Text style={styles.insightTitle}>Study Consistency</Text>
-              <Text style={styles.insightValue}>
-                {data.currentStreak >= 7
-                  ? 'Outstanding'
-                  : data.currentStreak >= 3
-                    ? 'Good'
-                    : 'Starting'
-                }
-              </Text>
-              <Text style={styles.insightDescription}>
-                {data.currentStreak > 0
-                  ? `You've maintained a ${data.currentStreak}-day streak. `
-                  : 'Start your learning journey today! '
-                }
-                {data.currentStreak >= 7
-                  ? 'This level of consistency will lead to great results.'
-                  : data.currentStreak >= 3
-                    ? 'Try to maintain this momentum for better results.'
-                    : 'Building daily habits is key to long-term success.'
-                }
-              </Text>
-            </View>
           </View>
         </View>
       </ScrollView>

@@ -6,11 +6,12 @@
       "*": ["./src/*"],
       "@/*": ["./src/*"],
       "app/*": ["./src/app/*"],
+      "entities/*": ["./src/entities/*"],
       "shared/*": ["./src/shared/*"],
       "screens/*": ["./src/screens/*"],
       "native/*": ["./src/native/*"],
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "react-native.config.js"],
   "exclude": ["**/node_modules", "**/Pods"]
 }

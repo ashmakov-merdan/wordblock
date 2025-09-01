@@ -69,7 +69,9 @@ class UsageTrackingService {
 
   async getSessions(): Promise<UsageSession[]> {
     try {
-      return await storageService.getItem('usage_sessions', []);
+      // Use a public method or create a new one to get usage sessions
+      const sessions = await storageService.getUsageSessions();
+      return sessions;
     } catch (error) {
       console.error('Failed to get usage sessions:', error);
       return [];

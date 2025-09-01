@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -6,109 +6,19 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { storageService } from 'shared/lib/storage';
 import { theme } from 'shared/theme';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeftIcon, CheckCircleIcon, WarningIcon, XCircleIcon, LightbulbIcon } from 'phosphor-react-native';
-
-type Difficulty = 'easy' | 'medium' | 'hard';
+import { difficulties, useCreateWord } from 'entities/words';
 
 const AddWordScreen = () => {
-  const navigation = useNavigation();
-  const [word, setWord] = useState('');
-  const [definition, setDefinition] = useState('');
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
-  const [loading, setLoading] = useState(false);
-
-  const difficulties: { value: Difficulty; label: string; color: string; icon: React.ReactNode }[] = [
-    { value: 'easy', label: 'Easy', color: theme.semanticColors.success, icon: <CheckCircleIcon size={20} color={theme.semanticColors.success} /> },
-    { value: 'medium', label: 'Medium', color: theme.semanticColors.warning, icon: <WarningIcon size={20} color={theme.semanticColors.warning} /> },
-    { value: 'hard', label: 'Hard', color: theme.semanticColors.error, icon: <XCircleIcon size={20} color={theme.semanticColors.error} /> },
-  ];
-
-  const validateForm = (): string | null => {
-    if (!word.trim()) {
-      return 'Please enter a word';
-    }
-    if (!definition.trim()) {
-      return 'Please enter a definition';
-    }
-    if (word.trim().length < 2) {
-      return 'Word must be at least 2 characters long';
-    }
-    if (definition.trim().length < 10) {
-      return 'Definition must be at least 10 characters long';
-    }
-    return null;
-  };
-
-  const handleAddWord = async () => {
-    const error = validateForm();
-    if (error) {
-      Alert.alert('Validation Error', error);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const newWord = await storageService.addWord({
-        word: word.trim(),
-        definition: definition.trim(),
-        isLearned: false,
-        difficulty,
-      });
-
-      Alert.alert(
-        'Success!',
-        `"${newWord.word}" has been added to your word list.`,
-        [
-          {
-            text: 'Add Another',
-            onPress: () => {
-              setWord('');
-              setDefinition('');
-              setDifficulty('medium');
-            },
-          },
-          {
-            text: 'View Words',
-            onPress: () => navigation.navigate('WordList' as never),
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Failed to add word:', error);
-      Alert.alert('Error', 'Failed to add word. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    if (word.trim() || definition.trim()) {
-      Alert.alert(
-        'Discard Changes?',
-        'You have unsaved changes. Are you sure you want to discard them?',
-        [
-          { text: 'Keep Editing', style: 'cancel' },
-          { text: 'Discard', style: 'destructive', onPress: () => navigation.goBack() },
-        ]
-      );
-    } else {
-      navigation.goBack();
-    }
-  };
-
-  const isFormValid = word.trim() && definition.trim() && !loading;
+  const { values, loading, isFormValid, handleAdd, handleCancel, onChange } = useCreateWord();
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
@@ -126,7 +36,7 @@ const AddWordScreen = () => {
               styles.saveButton,
               !isFormValid && styles.saveButtonDisabled
             ]}
-            onPress={handleAddWord}
+            onPress={handleAdd}
             disabled={!isFormValid}
           >
             <Text style={[
@@ -144,8 +54,8 @@ const AddWordScreen = () => {
             <Text style={styles.inputLabel}>Word *</Text>
             <TextInput
               style={styles.textInput}
-              value={word}
-              onChangeText={setWord}
+              value={values.word}
+              onChangeText={(value) => onChange('word', value)}
               placeholder="Enter the word you want to learn"
               placeholderTextColor={theme.semanticColors.textSecondary}
               autoCapitalize="none"
@@ -153,7 +63,7 @@ const AddWordScreen = () => {
               maxLength={50}
             />
             <Text style={styles.characterCount}>
-              {word.length}/50 characters
+              {values.word.length}/50 characters
             </Text>
           </View>
 
@@ -162,8 +72,8 @@ const AddWordScreen = () => {
             <Text style={styles.inputLabel}>Definition *</Text>
             <TextInput
               style={[styles.textInput, styles.definitionInput]}
-              value={definition}
-              onChangeText={setDefinition}
+              value={values.definition}
+              onChangeText={(value) => onChange('definition', value)}
               placeholder="Enter the definition or meaning of the word"
               placeholderTextColor={theme.semanticColors.textSecondary}
               multiline
@@ -171,7 +81,7 @@ const AddWordScreen = () => {
               maxLength={500}
             />
             <Text style={styles.characterCount}>
-              {definition.length}/500 characters
+              {values.definition.length}/500 characters
             </Text>
           </View>
 
@@ -187,40 +97,19 @@ const AddWordScreen = () => {
                   key={diff.value}
                   style={[
                     styles.difficultyButton,
-                    difficulty === diff.value && styles.difficultyButtonSelected,
+                    values.difficulty === diff.value && styles.difficultyButtonSelected,
                     { borderColor: diff.color }
                   ]}
-                  onPress={() => setDifficulty(diff.value)}
+                  onPress={() => onChange("difficulty", diff.value)}
                 >
-                  {diff.icon}
                   <Text style={[
                     styles.difficultyText,
-                    difficulty === diff.value && styles.difficultyTextSelected
+                    values.difficulty === diff.value && styles.difficultyTextSelected
                   ]}>
                     {diff.label}
                   </Text>
                 </TouchableOpacity>
               ))}
-            </View>
-          </View>
-
-          {/* Tips Section */}
-          <View style={styles.tipsSection}>
-            <View style={styles.tipsTitleContainer}>
-              <LightbulbIcon size={20} color="#FF9500" />
-              <Text style={styles.tipsTitle}> Tips for Adding Words</Text>
-            </View>
-            <View style={styles.tipItem}>
-              <Text style={styles.tipText}>• Keep definitions clear and concise</Text>
-            </View>
-            <View style={styles.tipItem}>
-              <Text style={styles.tipText}>• Include example usage when helpful</Text>
-            </View>
-            <View style={styles.tipItem}>
-              <Text style={styles.tipText}>• Choose appropriate difficulty level</Text>
-            </View>
-            <View style={styles.tipItem}>
-              <Text style={styles.tipText}>• You can edit words later from the word list</Text>
             </View>
           </View>
         </ScrollView>

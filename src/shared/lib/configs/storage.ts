@@ -1,3 +1,5 @@
+import { WORD_DIFFICULTY } from "entities/words";
+
 export const STORAGE_CONFIG = {
   DEFAULTS: {
     PROGRESS: {
@@ -28,9 +30,9 @@ export const STORAGE_CONFIG = {
   },
 
   DIFFICULTY_WEIGHTS: {
-    easy: 0,
-    medium: 1,
-    hard: 2,
+    easy: WORD_DIFFICULTY.EASY,
+    medium: WORD_DIFFICULTY.MEDIUM,
+    hard: WORD_DIFFICULTY.HARD,
   },
 
   SEARCH: {

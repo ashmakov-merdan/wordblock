@@ -1,3 +1,4 @@
+import { WORD_DIFFICULTY } from 'entities/words';
 import { Word } from '../types/storage';
 import { DIFFICULTIES, Difficulty } from 'shared/lib/configs';
 
@@ -17,61 +18,61 @@ export class SampleWordDataSource implements WordDataSource {
         word: 'Serendipity',
         definition: 'The occurrence and development of events by chance in a happy or beneficial way.',
         isLearned: false,
-        difficulty: DIFFICULTIES.MEDIUM,
+        difficulty: WORD_DIFFICULTY.MEDIUM,
       },
       {
         word: 'Ephemeral',
         definition: 'Lasting for a very short time; transitory.',
         isLearned: false,
-        difficulty: DIFFICULTIES.MEDIUM,
+        difficulty: WORD_DIFFICULTY.MEDIUM,
       },
       {
         word: 'Ubiquitous',
         definition: 'Present, appearing, or found everywhere.',
         isLearned: false,
-        difficulty: DIFFICULTIES.HARD,
+        difficulty: WORD_DIFFICULTY.HARD,
       },
       {
         word: 'Eloquent',
         definition: 'Fluent or persuasive in speaking or writing.',
         isLearned: false,
-        difficulty: DIFFICULTIES.MEDIUM,
+        difficulty: WORD_DIFFICULTY.MEDIUM,
       },
       {
         word: 'Resilient',
         definition: 'Able to withstand or recover quickly from difficult conditions.',
         isLearned: false,
-        difficulty: DIFFICULTIES.MEDIUM,
+        difficulty: WORD_DIFFICULTY.MEDIUM,
       },
       {
         word: 'Perseverance',
         definition: 'Persistence in doing something despite difficulty or delay in achieving success.',
         isLearned: false,
-        difficulty: DIFFICULTIES.MEDIUM,
+        difficulty: WORD_DIFFICULTY.MEDIUM,
       },
       {
         word: 'Innovation',
         definition: 'A new method, idea, product, etc.',
         isLearned: false,
-        difficulty: DIFFICULTIES.EASY,
+        difficulty: WORD_DIFFICULTY.EASY,
       },
       {
         word: 'Authentic',
         definition: 'Of undisputed origin and not a copy; genuine.',
         isLearned: false,
-        difficulty: DIFFICULTIES.EASY,
+        difficulty: WORD_DIFFICULTY.EASY,
       },
       {
         word: 'Empathy',
         definition: 'The ability to understand and share the feelings of another.',
         isLearned: false,
-        difficulty: DIFFICULTIES.EASY,
+        difficulty: WORD_DIFFICULTY.EASY,
       },
       {
         word: 'Tenacity',
         definition: 'The quality or fact of being very determined; determination.',
         isLearned: false,
-        difficulty: DIFFICULTIES.MEDIUM,
+        difficulty: WORD_DIFFICULTY.MEDIUM,
       },
     ];
   }
@@ -169,7 +170,7 @@ export class WordDataProvider {
   // Utility method to get words by difficulty
   async getWordsByDifficulty(
     words: Omit<Word, 'id' | 'createdAt' | 'reviewCount'>[],
-    difficulty: Difficulty
+    difficulty: WORD_DIFFICULTY
   ): Promise<Omit<Word, 'id' | 'createdAt' | 'reviewCount'>[]> {
     return words.filter(word => word.difficulty === difficulty);
   }
@@ -203,9 +204,9 @@ export class WordDataProvider {
     byDifficulty: Record<Difficulty, number>;
   } {
     const byDifficulty = {
-      easy: words.filter(w => w.difficulty === DIFFICULTIES.EASY).length,
-      medium: words.filter(w => w.difficulty === DIFFICULTIES.MEDIUM).length,
-      hard: words.filter(w => w.difficulty === DIFFICULTIES.HARD).length,
+      easy: words.filter(w => w.difficulty === WORD_DIFFICULTY.EASY).length,
+      medium: words.filter(w => w.difficulty === WORD_DIFFICULTY.MEDIUM).length,
+      hard: words.filter(w => w.difficulty === WORD_DIFFICULTY.HARD).length,
     };
 
     return {
