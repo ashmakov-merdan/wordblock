@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Image, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Button } from "shared/ui";
@@ -8,12 +8,10 @@ import logo from 'shared/assets/images/logo.png';
 import { GearSixIcon } from "phosphor-react-native";
 import { HeroDescription, WordBlocks } from "features/hero";
 import { theme } from "shared/theme";
-import { useWordsStore, populateWithMockData } from "entities/words";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [_refreshKey, setRefreshKey] = useState(0);
-  const { addWord, words, clearAllWords } = useWordsStore();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -32,14 +30,6 @@ const HomeScreen = () => {
   const handleSettings = useCallback(() => {
     navigation.navigate('Settings' as never);
   }, [navigation]);
-
-  const handleAddMockData = useCallback(() => {
-    populateWithMockData(addWord);
-  }, [addWord]);
-
-  const handleClearMockData = useCallback(() => {
-    clearAllWords();
-  }, [clearAllWords]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -67,33 +57,6 @@ const HomeScreen = () => {
 
         <View style={styles.content}>
           <SummaryList />
-          
-          {/* Mock Data Section for Testing */}
-          <View style={styles.mockDataSection}>
-            <Text style={styles.mockDataTitle}>
-              Testing Tools ({words.length} words)
-            </Text>
-            <View style={styles.mockDataButtons}>
-              <Button
-                title="Add Test Words"
-                subtitle="Add sample words to test the learning screen"
-                onPress={handleAddMockData}
-                size={'sm'}
-                variant={'outlined'}
-                color={'neutral'}
-              />
-              {words.length > 0 && (
-                <Button
-                  title="Clear All Words"
-                  subtitle="Remove all words from the store"
-                  onPress={handleClearMockData}
-                  size={'sm'}
-                  variant={'outlined'}
-                  color={'error'}
-                />
-              )}
-            </View>
-          </View>
           
           <View style={styles.statistics}>
             <Button
