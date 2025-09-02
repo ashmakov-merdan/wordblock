@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Image } from "react-native";
+import { View, StyleSheet, ScrollView, Image, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Button } from "shared/ui";
@@ -8,10 +8,12 @@ import logo from 'shared/assets/images/logo.png';
 import { GearSixIcon } from "phosphor-react-native";
 import { HeroDescription, WordBlocks } from "features/hero";
 import { theme } from "shared/theme";
+import { useWordsStore, populateWithMockData } from "entities/words";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [_refreshKey, setRefreshKey] = useState(0);
+  const { addWord, words, clearAllWords } = useWordsStore();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -30,6 +32,14 @@ const HomeScreen = () => {
   const handleSettings = useCallback(() => {
     navigation.navigate('Settings' as never);
   }, [navigation]);
+
+  const handleAddMockData = useCallback(() => {
+    populateWithMockData(addWord);
+  }, [addWord]);
+
+  const handleClearMockData = useCallback(() => {
+    clearAllWords();
+  }, [clearAllWords]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -57,6 +67,34 @@ const HomeScreen = () => {
 
         <View style={styles.content}>
           <SummaryList />
+          
+          {/* Mock Data Section for Testing */}
+          <View style={styles.mockDataSection}>
+            <Text style={styles.mockDataTitle}>
+              Testing Tools ({words.length} words)
+            </Text>
+            <View style={styles.mockDataButtons}>
+              <Button
+                title="Add Test Words"
+                subtitle="Add sample words to test the learning screen"
+                onPress={handleAddMockData}
+                size={'sm'}
+                variant={'outlined'}
+                color={'neutral'}
+              />
+              {words.length > 0 && (
+                <Button
+                  title="Clear All Words"
+                  subtitle="Remove all words from the store"
+                  onPress={handleClearMockData}
+                  size={'sm'}
+                  variant={'outlined'}
+                  color={'error'}
+                />
+              )}
+            </View>
+          </View>
+          
           <View style={styles.statistics}>
             <Button
               title="View statistics"
@@ -70,7 +108,7 @@ const HomeScreen = () => {
           <View>
             <Button
               title="Start Learning"
-              subtitle="Browse and learn new words"
+              subtitle="Browse words and start learning"
               onPress={handleStartLearning}
               size={'sm'}
             />
@@ -115,7 +153,24 @@ const styles = StyleSheet.create({
     maxWidth: 200,
     width: '100%',
     margin: 'auto',
-  }
+  },
+  mockDataSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border.light,
+  },
+  mockDataTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  mockDataButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 10,
+  },
 });
 
 export default HomeScreen;

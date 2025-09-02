@@ -1,6 +1,6 @@
 import { createNativeStackNavigator, NativeStackHeaderProps } from "@react-navigation/native-stack";
 import { CreateWord } from "features/words";
-import { HomeScreen, StatisticsScreen, SettingsScreen, WordListScreen } from "screens";
+import { HomeScreen, StatisticsScreen, SettingsScreen, WordListScreen, LearningScreen } from "screens";
 import { Header } from "shared/ui";
 
 const Stack = createNativeStackNavigator();
@@ -37,6 +37,13 @@ const StackNavigation = () => {
         options={{
           title: 'Word List',
           headerRight: CreateWordForm
+        }}
+      />
+      <Stack.Screen
+        name={'Learning'}
+        component={LearningScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
