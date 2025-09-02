@@ -45,8 +45,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing[4],
   },
   separator: {
-    height: 1,
-    backgroundColor: theme.colors.border.light
+    height: 16,
   },
   emptyState: {
     padding: theme.spacing[4],

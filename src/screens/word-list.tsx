@@ -86,7 +86,7 @@ const WordListScreen = () => {
           title="Start Learning"
           subtitle="Begin your learning session"
           onPress={handleStartLearning}
-          size={'lg'}
+          size={'sm'}
         />
       </View>
     </View>
@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
   },
   learningButtonContainer: {
     padding: theme.spacing[4],
+    paddingBottom: theme.spacing[8],
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: theme.colors.border.light,
