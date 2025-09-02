@@ -9,7 +9,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'shared/ui';
 import { theme } from 'shared/theme';
-import { ChartFilters, getDailyData, getMonthlyData, getWeeklyData } from 'features/statistics';
+import { 
+  ChartFilters, 
+  getDailyData, 
+  getMonthlyData, 
+  getWeeklyData
+} from 'features/statistics';
 import { SummaryList } from 'features/summary';
 import { useWordsStore } from 'entities/words';
 import { useStudySessionStore } from 'entities/sessions';
@@ -33,10 +38,14 @@ const StatisticsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [chartFilter, setChartFilter] = useState<'daily' | 'weekly' | 'monthly'>('daily');
-
   // Get data from stores
   const { getWordStats } = useWordsStore();
-  const { getTotalStudyTime, getAverageSessionTime, getTodaySessions, sessions } = useStudySessionStore();
+  const { 
+    getTotalStudyTime, 
+    getAverageSessionTime, 
+    getTodaySessions, 
+    sessions
+  } = useStudySessionStore();
   const { defaults } = useSettingsStore();
 
   const loadData = React.useCallback(async () => {
@@ -123,13 +132,13 @@ const StatisticsScreen = () => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Overview</Text>
-          <SummaryList />
+            <SummaryList />
         </View>
 
-        {/* Usage Analytics */}
+        {/* Study Session Analytics */}
         <View style={styles.section}>
           <View style={styles.chartHeader}>
-            <Text style={styles.sectionTitle}>Usage Analytics</Text>
+            <Text style={styles.sectionTitle}>Study Session Analytics</Text>
             <View style={styles.filterContainer}>
               <ChartFilters
                 filter={chartFilter}
@@ -137,22 +146,18 @@ const StatisticsScreen = () => {
               />
             </View>
           </View>
-          {(() => {
-            const chartData = getChartData();
-
-            return (
-              <BarChart
-                data={chartData}
-                height={250}
-                showValues={true}
-              />
-            );
-          })()}
+          <BarChart
+            data={getChartData()}
+            height={250}
+            showValues={true}
+          />
         </View>
       </ScrollView>
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {

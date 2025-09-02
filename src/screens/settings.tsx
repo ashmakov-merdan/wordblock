@@ -12,7 +12,6 @@ import BlockingInterval from 'features/blocking-interval';
 import SettingsItem from 'features/settings-item';
 
 export default function SettingsScreen() {
-
   const [hasPermission, setHasPermission] = useState(false);
 
   const toggleBlocking = (value: boolean) => {
@@ -30,10 +29,6 @@ export default function SettingsScreen() {
 
   const toggleNotifications = (value: boolean) => {
     console.log('Toggle notifications:', value);
-  };
-
-  const toggleSound = (value: boolean) => {
-    console.log('Toggle sound:', value);
   };
 
   const updateBlockingInterval = (intervalMinutes: number) => {
@@ -65,13 +60,6 @@ export default function SettingsScreen() {
             description='Receive notifications for learning reminders'
             value={false}
             onChange={toggleNotifications}
-          />
-
-          <SettingsItem
-            label='Sound Effects'
-            description='Play sounds for interactions and alerts'
-            value={false}
-            onChange={toggleSound}
           />
 
           <SettingsItem

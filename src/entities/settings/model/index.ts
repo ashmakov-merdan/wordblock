@@ -17,7 +17,6 @@ export interface BlockingSettings {
 
 export interface AppSettings {
   notifications: boolean;
-  soundEnabled: boolean;
   autoSave: boolean;
 };
 

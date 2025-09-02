@@ -1,6 +1,7 @@
 import { createNativeStackNavigator, NativeStackHeaderProps } from "@react-navigation/native-stack";
 import { CreateWord } from "features/words";
 import { HomeScreen, StatisticsScreen, SettingsScreen, WordListScreen, LearningScreen } from "screens";
+import UsageStatsScreen from "screens/usage-stats";
 import { Header } from "shared/ui";
 
 const Stack = createNativeStackNavigator();
@@ -44,6 +45,13 @@ const StackNavigation = () => {
         component={LearningScreen}
         options={{
           headerShown: false,
+        }}
+      />
+      <Stack.Screen 
+        name={'UsageStats'}
+        component={UsageStatsScreen}
+        options={{
+          title: 'Usage Stats',
         }}
       />
     </Stack.Navigator>

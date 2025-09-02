@@ -9,6 +9,7 @@ interface StudySessionState {
   updateSession: (id: string, updates: Partial<IStudySession>) => void;
   deleteSession: (id: string) => void;
   clearAllSessions: () => void;
+  
   // Selectors
   getSessionById: (id: string) => IStudySession | undefined;
   getSessionsByDateRange: (startDate: number, endDate: number) => IStudySession[];
