@@ -27,6 +27,9 @@ const Header: FC<NativeStackHeaderProps> = ({ navigation, options }) => {
           </View>
         )}
         <Text style={styles.label}>{options.title}</Text>
+        {options.headerRight && (
+          <View style={styles.rightElement}>{options.headerRight({})}</View>
+        )}
       </View>
     </View>
   )
@@ -66,6 +69,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
     borderRadius: 100,
     zIndex: 20
+  },
+  rightElement: {
+    position: 'absolute',
+    right: 16,
+    bottom: 0,
+    top: 0,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })
 

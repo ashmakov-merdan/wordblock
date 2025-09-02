@@ -1,15 +1,19 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeScreen, StatisticsScreen, BlockScreen, LearningScreen, SettingsScreen, WordListScreen, AddWordScreen } from "screens";
+import { createNativeStackNavigator, NativeStackHeaderProps } from "@react-navigation/native-stack";
+import { CreateWord } from "features/words";
+import { HomeScreen, StatisticsScreen, SettingsScreen, WordListScreen } from "screens";
 import { Header } from "shared/ui";
 
 const Stack = createNativeStackNavigator();
+
+const StackHeader = (props: NativeStackHeaderProps) => <Header {...props} />;
+const CreateWordForm = () => <CreateWord />;
 
 const StackNavigation = () => {
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        header: (props) => <Header {...props} />
+        header: StackHeader
       }}>
       <Stack.Screen name={"Home"} component={HomeScreen} options={{
         headerShown: false,
@@ -20,8 +24,6 @@ const StackNavigation = () => {
         options={{
           title: 'Statistics'
         }} />
-      <Stack.Screen name={"Block"} component={BlockScreen} />
-      <Stack.Screen name={"Learning"} component={LearningScreen} />
       <Stack.Screen
         name={"Settings"}
         component={SettingsScreen}
@@ -29,8 +31,14 @@ const StackNavigation = () => {
           title: 'Settings'
         }}
       />
-      <Stack.Screen name={"WordList"} component={WordListScreen} />
-      <Stack.Screen name={"AddWord"} component={AddWordScreen} />
+      <Stack.Screen
+        name={'WordList'}
+        component={WordListScreen}
+        options={{
+          title: 'Word List',
+          headerRight: CreateWordForm
+        }}
+      />
     </Stack.Navigator>
   )
 };

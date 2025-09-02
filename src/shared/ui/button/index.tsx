@@ -181,6 +181,11 @@ const Button: FC<ButtonProps> = ({
 
     switch (variant) {
       case 'solid':
+        if (color === 'neutral') {
+          return {
+            backgroundColor: selectedColor[100],
+          }
+        };
         return {
           backgroundColor: selectedColor[500],
           borderColor: selectedColor[500],
@@ -227,6 +232,12 @@ const Button: FC<ButtonProps> = ({
 
     switch (variant) {
       case 'solid':
+        if(color === 'neutral') {
+          return {
+            color: colors.text.primary,
+          };
+        };
+
         return {
           color: colors.text.inverse,
         };

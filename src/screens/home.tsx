@@ -1,8 +1,6 @@
 import { View, StyleSheet, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { usageTrackingService } from "shared/lib/services";
-import { blockingService } from "shared/lib/services/blocking-service";
 import { Button } from "shared/ui";
 import React, { useCallback, useState } from "react";
 import { SummaryList } from "features/summary";
@@ -14,27 +12,15 @@ import { theme } from "shared/theme";
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [_refreshKey, setRefreshKey] = useState(0);
-  const [_isMonitoringActive, setIsMonitoringActive] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
-      usageTrackingService.startSession('Home');
       setRefreshKey(prev => prev + 1);
-      checkMonitoringStatus();
     }, [])
   );
 
-  const checkMonitoringStatus = async () => {
-    try {
-      const isActive = await blockingService.isBackgroundMonitoringActive();
-      setIsMonitoringActive(isActive);
-    } catch (error) {
-      console.error('Failed to check monitoring status:', error);
-    }
-  };
-
   const handleStartLearning = () => {
-    navigation.navigate('Learning' as never);
+    navigation.navigate('WordList' as never);
   };
 
   const handleViewStatistics = useCallback(() => {

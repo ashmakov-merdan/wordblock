@@ -16,3 +16,16 @@ export interface WordDifficulties {
   label: string;
   color: string;
 }
+
+export interface IWord extends WordData {
+  id: string;
+  createdAt: number;
+  lastReviewed?: number;
+  reviewCount: number;
+}
+
+export enum WordFilters {
+  ALL = 'all',
+  LEARNED = 'learned',
+  UNLEARNED = 'unlearned'
+};
