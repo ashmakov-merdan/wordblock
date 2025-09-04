@@ -15,11 +15,6 @@ export interface BlockingSettings {
   totalBlocksTriggered: number;
 };
 
-export interface AppSettings {
-  notifications: boolean;
-  autoSave: boolean;
-};
-
 export interface UserProgress {
   totalWords: number;
   learnedWords: number;
@@ -34,7 +29,6 @@ export interface IStorage {
   words: IWord[];
   progress: UserProgress;
   blockingSettings: BlockingSettings;
-  appSettings: AppSettings;
   studySessions: IStudySession[];
   lastSyncTime?: number;
 }

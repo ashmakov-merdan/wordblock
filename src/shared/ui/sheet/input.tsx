@@ -1,32 +1,39 @@
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BottomSheetTextInputProps } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetTextInput";
 import { Icon } from "phosphor-react-native";
 import { FC } from "react";
-import { KeyboardTypeOptions, StyleSheet, TextInput, View } from "react-native";
+import { Keyboard, StyleSheet, View } from "react-native";
 import { theme } from "shared/theme";
 
-interface InputProps {
+interface ModalInputProps extends BottomSheetTextInputProps {
   startIcon?: Icon;
   endIcon?: Icon;
   placeholder?: string;
-  value?: string;
-  onChange: (text: string) => void;
-  keyboardType?: KeyboardTypeOptions;
-  multiline?: boolean;
-  numberOfLines?: number;
 }
 
-const Input: FC<InputProps> = ({ startIcon, endIcon, placeholder, value, onChange, multiline = false, numberOfLines, keyboardType = 'default' }) => {
+const Input: FC<ModalInputProps> = ({
+  startIcon,
+  endIcon,
+  placeholder,
+  multiline = false,
+  numberOfLines,
+  keyboardType = 'default',
+  defaultValue,
+  onChangeText,
+}) => {
   const StartIcon = startIcon;
   const EndIcon = endIcon;
 
   return (
     <View style={styles.container}>
       {StartIcon && <StartIcon size={24} color={theme.colors.neutral[500]} />}
-      <TextInput
-        style={styles.input}
+      <BottomSheetTextInput
+        style={[styles.input]}
         placeholder={placeholder}
         placeholderTextColor={theme.colors.neutral[400]}
-        value={value}
-        onChangeText={onChange}
+        defaultValue={defaultValue}
+        onSubmitEditing={() => Keyboard.dismiss()}
+        onChangeText={onChangeText}
         autoComplete={'off'}
         keyboardType={keyboardType}
         multiline={multiline}
@@ -50,7 +57,6 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-
   }
 })
 

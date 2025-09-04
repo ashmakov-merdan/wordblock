@@ -1,22 +1,21 @@
 import { BookOpenIcon, PlusIcon, StarIcon } from "phosphor-react-native";
-import { FC, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { theme } from "shared/theme";
-import { Button, Input, Sheet, useToggleSheet } from "shared/ui";
+import { Button, Sheet, useToggleSheet , Input} from "shared/ui";
 import { WORD_DIFFICULTY } from "entities/words/model";
 import { useWordsStore } from "entities/words/store";
 
 const CreateWord: FC = () => {
   const { bottomSheetRef, onOpenSheet, onCloseSheet } = useToggleSheet();
-  const [ word, setWord ] = useState<string>('');
-  const [ definition, setDefinition ] = useState<string>('');
-  const [ difficulty, setDifficulty ] = useState<WORD_DIFFICULTY>(WORD_DIFFICULTY.MEDIUM);
-  const [ error, setError ] = useState<string>('');
-  
+  const [word, setWord] = useState<string>('');
+  const [definition, setDefinition] = useState<string>('');
+  const [difficulty, setDifficulty] = useState<WORD_DIFFICULTY>(WORD_DIFFICULTY.MEDIUM);
+  const [error, setError] = useState<string>('');
+
   const addWord = useWordsStore(state => state.addWord);
 
-  const handleCreate = () => {
-    // Validate inputs
+  const handleCreate = useCallback(() => {
     if (!word.trim()) {
       setError('Word is required');
       return;
@@ -26,7 +25,6 @@ const CreateWord: FC = () => {
       return;
     }
 
-    // Add the word
     addWord({
       word: word.trim(),
       definition: definition.trim(),
@@ -34,17 +32,17 @@ const CreateWord: FC = () => {
       isLearned: false,
     });
 
-    // Reset form and close sheet
     setWord('');
     setDefinition('');
     setDifficulty(WORD_DIFFICULTY.MEDIUM);
     setError('');
-    onCloseSheet();
-  };
 
-  const handleDifficultyChange = (newDifficulty: WORD_DIFFICULTY) => {
-    setDifficulty(newDifficulty);
-  };
+    onCloseSheet();
+  }, [word, definition, difficulty, addWord, onCloseSheet]);
+
+  const handleDifficultyChange = useCallback((newDifficulty: WORD_DIFFICULTY) => {
+    setDifficulty(newDifficulty); 
+  }, []);
 
   return (
     <>
@@ -57,10 +55,16 @@ const CreateWord: FC = () => {
         shape='rounded'
         onPress={onOpenSheet}
       />
-      <Sheet ref={bottomSheetRef} display="Create new word" onClose={onCloseSheet}>
+      <Sheet
+        ref={bottomSheetRef}
+        display="Create new word"
+        onClose={onCloseSheet}
+        enableContentPanningGesture={false}
+        keyboardBehavior="interactive"
+        keyboardBlurBehavior="none"
+      >
         <View style={styles.content}>
           <Input
-            type={'bottomSheet'}
             startIcon={BookOpenIcon}
             placeholder={'Enter word'}
             value={word}
@@ -68,17 +72,14 @@ const CreateWord: FC = () => {
               setWord(value);
               setError('');
             }}
-            keyboardType='default'
           />
           <Input
-            type="bottomSheet"
             placeholder="Definition"
             value={definition}
             onChange={(value) => {
               setDefinition(value);
               setError('');
             }}
-            keyboardType='default'
             multiline
             numberOfLines={5}
           />
@@ -101,7 +102,7 @@ const CreateWord: FC = () => {
             </View>
           </View>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <Button 
+          <Button
             title="Create"
             color={'success'}
             onPress={handleCreate}

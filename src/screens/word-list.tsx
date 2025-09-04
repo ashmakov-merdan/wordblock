@@ -4,17 +4,14 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-
 import { MagnifyingGlassIcon } from 'phosphor-react-native';
-import { Input, Button } from 'shared/ui';
+import { Input } from 'shared/ui';
 import { theme } from 'shared/theme';
 import { useWordsStore } from 'entities/words';
 import { WORD_DIFFICULTY, WordFilters } from 'entities/words/model';
 import { WordList, FiltersWord } from 'features/words';
 
 const WordListScreen = () => {
-  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<WordFilters>(WordFilters.ALL);
   const [selectedDifficulty, setSelectedDifficulty] = useState<WORD_DIFFICULTY | 'all'>('all');
@@ -46,10 +43,6 @@ const WordListScreen = () => {
     return filtered.sort((a, b) => b.createdAt - a.createdAt);
   }, [words, selectedFilter, selectedDifficulty, searchQuery, getWordsByFilter, searchWords]);
 
-  const handleStartLearning = () => {
-    navigation.navigate('Learning' as never);
-  };
-
   return (
     <View style={styles.container}>
       {/* Search Bar */}
@@ -57,7 +50,6 @@ const WordListScreen = () => {
         <View style={{ flex: 1 }}>
           <Input
             startIcon={MagnifyingGlassIcon}
-            type={'default'}
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder='Search words'
@@ -79,16 +71,6 @@ const WordListScreen = () => {
       </View>
 
       <WordList words={filteredWords} />
-
-      {/* Start Learning Button */}
-      <View style={styles.learningButtonContainer}>
-        <Button
-          title="Start Learning"
-          subtitle="Begin your learning session"
-          onPress={handleStartLearning}
-          size={'sm'}
-        />
-      </View>
     </View>
   );
 };
@@ -115,13 +97,6 @@ const styles = StyleSheet.create({
   resultsCountText: {
     ...theme.typography.text.bodySmall,
     color: theme.semanticColors.textSecondary,
-  },
-  learningButtonContainer: {
-    padding: theme.spacing[4],
-    paddingBottom: theme.spacing[8],
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border.light,
   },
 });
 

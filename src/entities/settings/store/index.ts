@@ -1,5 +1,5 @@
 import { WORD_DIFFICULTY } from "entities/words";
-import { AppSettings, BLOCKING_INTERVAL, BlockingSettings, UserProgress } from "../model";
+import { BLOCKING_INTERVAL, BlockingSettings, UserProgress } from "../model";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -7,7 +7,6 @@ interface SettingsState {
   defaults: {
     progress: UserProgress;
     blockingSettings: BlockingSettings;
-    appSettings: AppSettings;
   };
   study: {
     defaultSessionSize: number;
@@ -19,7 +18,6 @@ interface SettingsState {
   // Actions
   updateProgress: (updates: Partial<UserProgress>) => void;
   updateBlockingSettings: (updates: Partial<BlockingSettings>) => void;
-  updateAppSettings: (updates: Partial<AppSettings>) => void;
   resetToDefaults: () => void;
 }
 
@@ -38,11 +36,6 @@ const initialState = {
       isEnabled: true,
       totalBlocksTriggered: 0,
     },
-    appSettings: {
-      notifications: true,
-      soundEnabled: true,
-      autoSave: true,
-    }
   },
 
   study: {
@@ -78,15 +71,6 @@ export const useSettingsStore = create<SettingsState>()(
           defaults: {
             ...state.defaults,
             blockingSettings: { ...state.defaults.blockingSettings, ...updates }
-          }
-        }));
-      },
-
-      updateAppSettings: (updates: Partial<AppSettings>) => {
-        set(state => ({
-          defaults: {
-            ...state.defaults,
-            appSettings: { ...state.defaults.appSettings, ...updates }
           }
         }));
       },

@@ -1,4 +1,4 @@
-import { BLOCKING_INTERVAL, UserProgress, BlockingSettings, AppSettings } from '../model';
+import { BLOCKING_INTERVAL, UserProgress, BlockingSettings } from '../model';
 
 export const BLOCKING_INTERVALS: { label: string; value: BLOCKING_INTERVAL }[] =
   [
@@ -12,7 +12,6 @@ export const STORAGE_KEYS = {
   WORDS: 'words',
   PROGRESS: 'progress',
   BLOCKING_SETTINGS: 'blocking_settings',
-  APP_SETTINGS: 'app_settings',
   STUDY_SESSIONS: 'study_sessions',
   LAST_SYNC: 'last_sync',
 } as const;
@@ -31,11 +30,6 @@ export const STORAGE_CONFIG = {
       intervalMinutes: BLOCKING_INTERVAL.FIFTEEN,
       isEnabled: true,
       totalBlocksTriggered: 0,
-    } as BlockingSettings,
-    APP_SETTINGS: {
-      notifications: true,
-      soundEnabled: true,
-      autoSave: true,
-    } as AppSettings,
+    } as BlockingSettings
   }
 } as const;

@@ -12,9 +12,18 @@ interface SheetProps extends Partial<BottomSheetModalProps> {
   display?: string;
   sizes?: (number | string)[] | SharedValue<(string | number)[]>;
   onClose?: () => void;
+  enableContentPanningGesture?: boolean;
+  keyboardBehavior?: 'interactive' | 'extend' | 'fillParent';
+  keyboardBlurBehavior?: 'none' | 'restore';
 };
 
-export const Sheet = memo(forwardRef<BottomSheetModal, SheetProps>(({ children, onClose, display, sizes, ...props }, ref) => {
+export const Sheet = memo(forwardRef<BottomSheetModal, SheetProps>(({
+  children,
+  onClose,
+  display,
+  sizes,
+  ...props
+}, ref) => {
   const { bottom } = useSafeAreaInsets();
 
   useFocusEffect(
@@ -28,7 +37,7 @@ export const Sheet = memo(forwardRef<BottomSheetModal, SheetProps>(({ children, 
       ref={ref}
       snapPoints={sizes}
       enablePanDownToClose
-      backdropComponent={(props) => <Backdrop onPress={onClose} {...props} />}
+      backdropComponent={backdropProps => <Backdrop onPress={onClose} {...backdropProps} />}
       handleIndicatorStyle={{
         backgroundColor: colors.neutral[200]
       }}

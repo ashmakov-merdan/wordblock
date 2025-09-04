@@ -10,6 +10,7 @@ import { BLOCKING_INTERVAL } from 'entities/settings';
 import { theme } from 'shared/theme';
 import BlockingInterval from 'features/blocking-interval';
 import SettingsItem from 'features/settings-item';
+import { UsageTimeSwitcher } from 'features/settings';
 
 export default function SettingsScreen() {
   const [hasPermission, setHasPermission] = useState(false);
@@ -27,10 +28,6 @@ export default function SettingsScreen() {
     console.log('Checking blocking status...');
   };
 
-  const toggleNotifications = (value: boolean) => {
-    console.log('Toggle notifications:', value);
-  };
-
   const updateBlockingInterval = (intervalMinutes: number) => {
     console.log('Update blocking interval:', intervalMinutes);
   };
@@ -39,6 +36,8 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
+          <UsageTimeSwitcher />
+          
           <SettingsItem
             label='Enable Blocking'
             description='Automatically block device access after time limit'
@@ -54,13 +53,6 @@ export default function SettingsScreen() {
               <Text style={styles.permissionButtonText}>Grant Usage Permission</Text>
             </TouchableOpacity>
           )}
-
-          <SettingsItem
-            label='Notifications'
-            description='Receive notifications for learning reminders'
-            value={false}
-            onChange={toggleNotifications}
-          />
 
           <SettingsItem
             label={'Blocking Status'}
