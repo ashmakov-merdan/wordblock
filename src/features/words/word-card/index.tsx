@@ -1,15 +1,14 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { 
-  CheckCircleIcon, 
-  XCircleIcon, 
-  StarIcon, 
-  StarHalfIcon,
+import {
+  CheckCircleIcon,
+  XCircleIcon,
   BookOpenIcon
 } from 'phosphor-react-native';
 import { theme } from "shared/theme";
 import { Speaker } from "shared/ui";
-import { IWord, WORD_DIFFICULTY } from "entities/words/model";
+import { IWord } from "entities/words/model";
+import WordDifficulty from '../word-difficulty';
 
 interface WordCardProps {
   word: IWord;
@@ -17,50 +16,11 @@ interface WordCardProps {
   showActions?: boolean;
 }
 
-const WordCard: React.FC<WordCardProps> = ({ 
+const WordCard: React.FC<WordCardProps> = ({
   word,
   onToggleLearned,
-  showActions = true 
+  showActions = true
 }) => {
-  const getDifficultyIcon = (difficulty: WORD_DIFFICULTY) => {
-    switch (difficulty) {
-      case WORD_DIFFICULTY.EASY:
-        return <StarIcon size={16} color={theme.colors.success[500]} weight="fill" />;
-      case WORD_DIFFICULTY.MEDIUM:
-        return <StarHalfIcon size={16} color={theme.colors.warning[500]} weight="fill" />;
-      case WORD_DIFFICULTY.HARD:
-        return <StarIcon size={16} color={theme.colors.error[500]} weight="fill" />;
-      default:
-        return null;
-    }
-  };
-
-  const getDifficultyColor = (difficulty: WORD_DIFFICULTY) => {
-    switch (difficulty) {
-      case WORD_DIFFICULTY.EASY:
-        return theme.colors.success[100];
-      case WORD_DIFFICULTY.MEDIUM:
-        return theme.colors.warning[100];
-      case WORD_DIFFICULTY.HARD:
-        return theme.colors.error[100];
-      default:
-        return theme.colors.neutral[100];
-    }
-  };
-
-  const getDifficultyLabel = (difficulty: WORD_DIFFICULTY) => {
-    switch (difficulty) {
-      case WORD_DIFFICULTY.EASY:
-        return 'Easy';
-      case WORD_DIFFICULTY.MEDIUM:
-        return 'Medium';
-      case WORD_DIFFICULTY.HARD:
-        return 'Hard';
-      default:
-        return 'Unknown';
-    }
-  };
-
   const handleToggleLearned = () => {
     if (onToggleLearned) {
       onToggleLearned(word.id);
@@ -72,17 +32,9 @@ const WordCard: React.FC<WordCardProps> = ({
       <View style={styles.header}>
         <View style={styles.wordInfo}>
           <Text style={styles.wordText}>{word.word}</Text>
-          <View style={[
-            styles.difficultyBadge,
-            { backgroundColor: getDifficultyColor(word.difficulty) }
-          ]}>
-            {getDifficultyIcon(word.difficulty)}
-            <Text style={styles.difficultyText}>
-              {getDifficultyLabel(word.difficulty)}
-            </Text>
-          </View>
+          <WordDifficulty value={word.difficulty} />
         </View>
-        
+
         {showActions && (
           <View style={styles.wordActions}>
             <TouchableOpacity
@@ -162,19 +114,6 @@ const styles = StyleSheet.create({
     ...theme.typography.text.h4,
     color: theme.semanticColors.textPrimary,
     flex: 1,
-  },
-  difficultyBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing[2],
-    paddingVertical: theme.spacing[1],
-    borderRadius: theme.borderRadius.sm,
-    gap: theme.spacing[1],
-  },
-  difficultyText: {
-    ...theme.typography.text.caption,
-    color: theme.semanticColors.textSecondary,
-    fontWeight: '500',
   },
   wordActions: {
     flexDirection: 'row',
