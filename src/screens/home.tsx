@@ -4,7 +4,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Button } from "shared/ui";
 import React, { useCallback, useState } from "react";
 import logo from 'shared/assets/images/logo.png';
-import { GearSixIcon } from "phosphor-react-native";
+import { GearSixIcon, TrendUpIcon } from "phosphor-react-native";
 import { HeroDescription, WordBlocks } from "features/hero";
 import { theme } from "shared/theme";
 
@@ -19,8 +19,12 @@ const HomeScreen = () => {
   );
 
   const handleStartLearning = () => {
-    navigation.navigate('WordList' as never);
+    navigation.navigate('Learning' as never);
   };
+
+  const handleViewWords = useCallback(() => {
+    navigation.navigate('WordList' as never);
+  }, [navigation]);
 
   const handleViewStatistics = useCallback(() => {
     navigation.navigate('Statistics' as never);
@@ -40,13 +44,25 @@ const HomeScreen = () => {
             alt={'logo'}
             style={styles.logo}
           />
-          <Button
-            icon={GearSixIcon}
-            isIconOnly
-            color={'neutral'}
-            variant={'outlined'}
-            onPress={handleSettings}
-          />
+          <View style={styles.headerButtons}>
+            <Button
+              icon={TrendUpIcon}
+              isIconOnly
+              size={'sm'}
+              color={"neutral"}
+              variant={'outlined'}
+              onPress={handleViewStatistics}
+            />
+            <Button
+              icon={GearSixIcon}
+              isIconOnly
+              size={'sm'}
+              color={'neutral'}
+              variant={'outlined'}
+              onPress={handleSettings}
+            />
+          </View>
+
         </View>
 
         <View style={styles.hero}>
@@ -58,23 +74,20 @@ const HomeScreen = () => {
           <View>
             <Button
               title="Start Learning"
-              subtitle="Browse words and start learning"
               onPress={handleStartLearning}
-              size={'sm'}
+              size={'md'}
             />
           </View>
-
-          <View style={styles.statistics}>
+          <View>
             <Button
-              title="View statistics"
+              title="Explore words"
+              subtitle="Browse and create your own words"
+              onPress={handleViewWords}
               size={'sm'}
-              onPress={handleViewStatistics}
               variant={'outlined'}
               color={'neutral'}
             />
           </View>
-
-
         </View>
 
       </ScrollView>
@@ -102,6 +115,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center'
   },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing[2],
+  },
   hero: {
     minHeight: 300,
   },
@@ -110,28 +128,6 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.border.light,
     paddingTop: 24,
     gap: 20
-  },
-  statistics: {
-    maxWidth: 200,
-    width: '100%',
-    margin: 'auto',
-  },
-  mockDataSection: {
-    marginTop: 20,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border.light,
-  },
-  mockDataTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  mockDataButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    gap: 10,
   },
 });
 

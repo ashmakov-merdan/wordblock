@@ -145,7 +145,7 @@ const Button: FC<ButtonProps> = ({
     }
 
     const variantStyles = getTextVariantStyles(variant, color);
-    variantStyles.opacity = 0.8;
+    variantStyles.opacity = 0.5;
 
     return { ...baseStyles, ...variantStyles };
   };
