@@ -10,8 +10,8 @@ export default {
   openUsageAccessSettings(): Promise<void> {
     return UsageStatsModule.openUsageAccessSettings();
   },
-  getAppUsage(start: number, end: number): Promise<UsageStatsType | null> {
-    return UsageStatsModule.getAppUsage(start, end);
+  getAppUsage(): Promise<UsageStatsType | null> {
+    return UsageStatsModule.getAppUsage();
   },
   getUsageEvents(start: number, end: number): Promise<UsageStatsEventType[]> {
     return UsageStatsModule.getUsageEvents(start, end);

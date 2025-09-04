@@ -63,18 +63,19 @@ class UsageStatsModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
-  // 3. Query daily aggregated usage stats
   @ReactMethod
-  fun getAppUsage(startTime: Double, endTime: Double, promise: Promise) {
+  fun getAppUsage(promise: Promise) {
     try {
       val usm = reactContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-      val list: List<UsageStats> = usm.queryUsageStats(
-        UsageStatsManager.INTERVAL_DAILY,
-        startTime.toLong(),
-        endTime.toLong()
+      val now = System.currentTimeMillis()
+  
+      val stats = usm.queryUsageStats(
+        UsageStatsManager.INTERVAL_BEST,
+        0,
+        now
       )
   
-      val myStats = list.find { it.packageName == reactContext.packageName }
+      val myStats = stats.find { it.packageName == reactContext.packageName }
   
       if (myStats != null) {
         val map = Arguments.createMap()
@@ -88,7 +89,7 @@ class UsageStatsModule(private val reactContext: ReactApplicationContext) :
         promise.resolve(null)
       }
     } catch (e: Exception) {
-      promise.reject("MYAPP_USAGE_ERROR", e.message, e)
+      promise.reject("TOTAL_USAGE_ERROR", e.message, e)
     }
   }
 

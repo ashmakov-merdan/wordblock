@@ -2,6 +2,7 @@ import { StyleSheet, View } from "react-native";
 import SummaryCard from "../card";
 import { BookOpenUserIcon, SealCheckIcon } from "phosphor-react-native";
 import { colors } from "shared/theme/colors";
+import { UsageTime } from "features/statistics";
 
 const SummaryList = () => {
   return (
@@ -18,6 +19,7 @@ const SummaryList = () => {
         icon={SealCheckIcon}
         color={colors.success[500]}
       />
+      <UsageTime />
     </View>
   )
 };
