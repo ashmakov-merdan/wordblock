@@ -3,7 +3,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Button } from "shared/ui";
 import React, { useCallback, useState } from "react";
-import { SummaryList } from "features/summary";
 import logo from 'shared/assets/images/logo.png';
 import { GearSixIcon } from "phosphor-react-native";
 import { HeroDescription, WordBlocks } from "features/hero";
@@ -56,8 +55,15 @@ const HomeScreen = () => {
         </View>
 
         <View style={styles.content}>
-          <SummaryList />
-          
+          <View>
+            <Button
+              title="Start Learning"
+              subtitle="Browse words and start learning"
+              onPress={handleStartLearning}
+              size={'sm'}
+            />
+          </View>
+
           <View style={styles.statistics}>
             <Button
               title="View statistics"
@@ -68,14 +74,7 @@ const HomeScreen = () => {
             />
           </View>
 
-          <View>
-            <Button
-              title="Start Learning"
-              subtitle="Browse words and start learning"
-              onPress={handleStartLearning}
-              size={'sm'}
-            />
-          </View>
+
         </View>
 
       </ScrollView>
