@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -11,13 +11,37 @@ import { theme } from 'shared/theme';
 import BlockingInterval from 'features/blocking-interval';
 import SettingsItem from 'features/settings-item';
 import { UsageTimeSwitcher } from 'features/settings';
+import stats from 'native/android/modules';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function SettingsScreen() {
+  const [interval, setInterval] = useState<BLOCKING_INTERVAL>(BLOCKING_INTERVAL.FIFTEEN);
+  const [isPinned, setPin] = useState<boolean>(false);
   const [hasPermission, setHasPermission] = useState(false);
 
-  const toggleBlocking = (value: boolean) => {
-    console.log('Toggle blocking:', value);
-  };
+  const checkPinned = useCallback(async () => {
+    const pin = await stats.isPinned();
+
+    if (pin) {
+      setPin(true);
+    } else {
+      setPin(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      checkPinned();
+    }, [checkPinned])
+  );
+
+  const toggleBlocking = useCallback(async () => {
+    if (isPinned) {
+      await stats.setBlocking(false);
+    } else {
+      await stats.setBlocking(true);
+    };
+  }, [isPinned]);
 
   const requestPermissions = () => {
     console.log('Requesting permissions...');
@@ -28,8 +52,8 @@ export default function SettingsScreen() {
     console.log('Checking blocking status...');
   };
 
-  const updateBlockingInterval = (intervalMinutes: number) => {
-    console.log('Update blocking interval:', intervalMinutes);
+  const updateBlockingInterval = (intervalMinutes: BLOCKING_INTERVAL) => {
+    setInterval(intervalMinutes);
   };
 
   return (
@@ -37,11 +61,11 @@ export default function SettingsScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
           <UsageTimeSwitcher />
-          
+
           <SettingsItem
             label='Enable Blocking'
             description='Automatically block device access after time limit'
-            value={false}
+            value={isPinned}
             onChange={toggleBlocking}
           />
 
@@ -62,7 +86,7 @@ export default function SettingsScreen() {
           />
 
           <BlockingInterval
-            defaultValue={BLOCKING_INTERVAL.FIFTEEN}
+            defaultValue={interval}
             onChangeBlockingInterval={updateBlockingInterval}
           />
         </View>

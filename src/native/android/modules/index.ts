@@ -16,4 +16,15 @@ export default {
   getUsageEvents(start: number, end: number): Promise<UsageStatsEventType[]> {
     return UsageStatsModule.getUsageEvents(start, end);
   },
+  async setBlocking(enabled: boolean): Promise<void> {
+    try {
+      await UsageStatsModule.setBlocking(enabled);
+    } catch (error) {
+      console.log('Failed to block device', error);
+    }
+  },
+  async isPinned(): Promise<boolean> {
+    const isPinned = await UsageStatsModule.isPinned();
+    return isPinned;
+  }
 };

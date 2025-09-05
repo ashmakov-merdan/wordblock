@@ -2,7 +2,6 @@ package com.wordblock
 
 import android.app.AppOpsManager
 import android.app.usage.UsageEvents
-import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -10,9 +9,10 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import com.facebook.react.bridge.*
+import android.app.ActivityManager
 
 class UsageStatsModule(private val reactContext: ReactApplicationContext) :
-  ReactContextBaseJavaModule(reactContext) {
+        ReactContextBaseJavaModule(reactContext) {
 
   override fun getName() = "UsageStatsModule"
 
@@ -21,20 +21,21 @@ class UsageStatsModule(private val reactContext: ReactApplicationContext) :
   fun hasUsagePermission(promise: Promise) {
     try {
       val appOps = reactContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-      val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        appOps.unsafeCheckOpNoThrow(
-          AppOpsManager.OPSTR_GET_USAGE_STATS,
-          android.os.Process.myUid(),
-          reactContext.packageName
-        )
-      } else {
-        @Suppress("DEPRECATION")
-        appOps.checkOpNoThrow(
-          AppOpsManager.OPSTR_GET_USAGE_STATS,
-          android.os.Process.myUid(),
-          reactContext.packageName
-        )
-      }
+      val mode =
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                appOps.unsafeCheckOpNoThrow(
+                        AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        android.os.Process.myUid(),
+                        reactContext.packageName
+                )
+              } else {
+                @Suppress("DEPRECATION")
+                appOps.checkOpNoThrow(
+                        AppOpsManager.OPSTR_GET_USAGE_STATS,
+                        android.os.Process.myUid(),
+                        reactContext.packageName
+                )
+              }
       promise.resolve(mode == AppOpsManager.MODE_ALLOWED)
     } catch (e: Exception) {
       promise.reject("PERMISSION_ERROR", e.message, e)
@@ -45,16 +46,16 @@ class UsageStatsModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun openUsageAccessSettings(promise: Promise) {
     try {
-      val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      }
+      val intent =
+              Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+              }
       reactContext.startActivity(intent)
       promise.resolve(null)
     } catch (e: ActivityNotFoundException) {
       try {
-        val fallback = Intent(Settings.ACTION_SETTINGS).apply {
-          addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val fallback =
+                Intent(Settings.ACTION_SETTINGS).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         reactContext.startActivity(fallback)
         promise.resolve(null)
       } catch (e2: Exception) {
@@ -68,15 +69,11 @@ class UsageStatsModule(private val reactContext: ReactApplicationContext) :
     try {
       val usm = reactContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
       val now = System.currentTimeMillis()
-  
-      val stats = usm.queryUsageStats(
-        UsageStatsManager.INTERVAL_BEST,
-        0,
-        now
-      )
-  
+
+      val stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, 0, now)
+
       val myStats = stats.find { it.packageName == reactContext.packageName }
-  
+
       if (myStats != null) {
         val map = Arguments.createMap()
         map.putString("packageName", myStats.packageName)
@@ -114,6 +111,38 @@ class UsageStatsModule(private val reactContext: ReactApplicationContext) :
       promise.resolve(result)
     } catch (e: Exception) {
       promise.reject("USAGE_EVENTS_ERROR", e.message, e)
+    }
+  }
+
+  @ReactMethod
+  fun setBlocking(enabled: Boolean, promise: Promise) {
+    try {
+      val activity = reactApplicationContext.currentActivity
+
+      if (activity != null) {
+        if (enabled) {
+          activity.startLockTask() // Blocks navigation & switching apps
+        } else {
+          activity.stopLockTask()
+        }
+        promise.resolve(null)
+      } else {
+        promise.reject("NO_ACTIVITY", "No current activity found")
+      }
+    } catch (e: Exception) {
+      promise.reject("BLOCK_ERROR", e.message, e)
+    }
+  }
+
+  @ReactMethod
+  fun isPinned(promise: Promise) {
+    try {
+      val activityManager =
+              reactApplicationContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+      val isPinned = activityManager.lockTaskModeState == ActivityManager.LOCK_TASK_MODE_LOCKED
+      promise.resolve(isPinned)
+    } catch (e: Exception) {
+      promise.reject("CHECK_PINNED_ERROR", e.message, e)
     }
   }
 }
